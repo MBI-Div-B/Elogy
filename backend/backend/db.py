@@ -5,16 +5,17 @@ import logging
 import sys
 
 from flask import url_for
-from playhouse.sqlite_ext import SqliteExtDatabase, JSONField, fn
+from playhouse.sqlite_ext import JSONField, fn
 from peewee import (IntegerField, CharField, TextField, BooleanField,
                     DateTimeField, ForeignKeyField, sqlite3)
 from peewee import Model, DoesNotExist, DeferredRelation, Entity
 
 from .utils import CustomJSONEncoder
 
+from peewee import PostgresqlDatabase
 
 # defer the actual db setup to later, when we have read the config
-db = SqliteExtDatabase(None)
+db = PostgresqlDatabase('elogy', user='postgres', password='root', host='docker.for.mac.host.internal', port=5432)
 
 
 class CustomJSONField(JSONField):
@@ -27,8 +28,6 @@ class CustomJSONField(JSONField):
 def setup_database(db_name, close=True):
     "Configure the database and make sure all the tables exist"
     # TODO: support further configuration options, see FlaskDB
-    db_dependencies_installed()
-    db.init(db_name)
     Logbook.create_table(fail_silently=True)
     LogbookChange.create_table(fail_silently=True)
     Entry.create_table(fail_silently=True)
@@ -616,7 +615,7 @@ class Entry(Model):
                 query = """
                 -- recursively add all 'descentant' logbooks (children, grandchilren, ...)
                 WITH RECURSIVE logbook1(id,parent_id) AS (
-                    values({logbook}, NULL)  -- parent logbook
+                    values({logbook}, 0)  -- parent logbook
                     UNION ALL
                     SELECT logbook.id, logbook.parent_id FROM logbook,logbook1
                     WHERE logbook.parent_id=logbook1.id
@@ -634,16 +633,16 @@ class Entry(Model):
                     coalesce(followup.follows_id, entry.id) AS thread,
                     count(distinct(followup.id)) AS n_followups,
                     -- 'timestamp' is the latest modification time in the thread
-                    max(datetime(coalesce(coalesce(followup.last_changed_at,followup.created_at),
-                        coalesce(entry.last_changed_at,entry.created_at)))) AS timestamp,
+                    max(coalesce(coalesce(followup.last_changed_at,followup.created_at), 
+                        coalesce(entry.last_changed_at,entry.created_at))) AS timestamp,
                     -- collect authors from all followups
-                    json_group_array(json(ifnull(followup.authors, "[]"))) as followup_authors
+                    array_agg(to_json(COALESCE(followup.authors, '[]'))) as followup_authors
                 FROM entry{authors}
-                JOIN logbook1
-                JOIN logbook2
+                JOIN logbook1 ON entry.logbook_id = logbook1.id
+                JOIN logbook2 ON entry.logbook_id = logbook2.id
                 JOIN logbook ON entry.logbook_id = logbook.id
                 {join_attachment}
-                LEFT JOIN entry AS followup ON entry.id == followup.follows_id
+                LEFT JOIN entry AS followup ON entry.id = followup.follows_id
                 WHERE ((entry.logbook_id=logbook1.id)
                        OR (entry.priority>100 AND entry.logbook_id=logbook2.id))
                       AND NOT logbook.archived
@@ -652,7 +651,7 @@ class Entry(Model):
                            authors=authors, logbook=logbook.id,
                            attributes=attributes,
                            metadata=metadata,
-                           join_attachment=("JOIN attachment ON attachment.entry_id == entry.id"
+                           join_attachment=("JOIN attachment ON attachment.entry_id = entry.id"
                                             if attachment_filter else ""))
             else:
                 # In this case we're not searching recursively
@@ -662,13 +661,13 @@ class Entry(Model):
                       {attachment}
                       coalesce(followup.follows_id, entry.id) AS thread,
                       count(followup.id) AS n_followups,
-                      max(datetime(coalesce(coalesce(followup.last_changed_at,followup.created_at),
+                      max(coalesce(coalesce(followup.last_changed_at,followup.created_at),
                         coalesce(entry.last_changed_at,entry.created_at)))) AS timestamp,
-                      json_group_array(json(ifnull(followup.authors, "[]"))) as followup_authors
+                      array_agg(to_json(COALESCE(followup.authors, '[]'))) as followup_authors
                     FROM entry{authors}
                     {join_attachment}
                     JOIN logbook on logbook.id = entry.logbook_id
-                    LEFT JOIN entry AS followup ON entry.id == followup.follows_id
+                    LEFT JOIN entry AS followup ON entry.id = followup.follows_id
                     WHERE entry.logbook_id = {logbook} AND NOT logbook.archived"""
                     .format(attachment=("attachment.path as attachment_path,"
                                        if attachment_filter else ""),
@@ -676,7 +675,7 @@ class Entry(Model):
                             attributes=attributes,
                             metadata=metadata,
                             logbook=logbook.id,
-                            join_attachment=("JOIN attachment ON attachment.entry_id == entry.id"
+                            join_attachment=("JOIN attachment ON attachment.entry_id = entry.id"
                                              if attachment_filter else "")))
 
         else:
@@ -688,13 +687,13 @@ class Entry(Model):
                 {attachment}
                 coalesce(followup.follows_id, entry.id) AS thread,
                 count(followup.id) AS n_followups,
-                max(datetime(coalesce(coalesce(followup.last_changed_at,followup.created_at),
+                max(coalesce(coalesce(followup.last_changed_at,followup.created_at),
                     coalesce(entry.last_changed_at,entry.created_at)))) AS timestamp,
-                json_group_array(json(ifnull(followup.authors, "[]"))) as followup_authors
+                array_agg(to_json(COALESCE(followup.authors, '[]'))) as followup_authors
             FROM entry{authors}
             {join_attachment}
             JOIN logbook on logbook.id = entry.logbook_id
-            LEFT JOIN entry AS followup ON entry.id == followup.follows_id
+            LEFT JOIN entry AS followup ON entry.id = followup.follows_id
             WHERE NOT logbook.archived
             """.format(attributes=attributes,
                        metadata=metadata,
@@ -702,7 +701,7 @@ class Entry(Model):
                                    if attachment_filter else ""),
                        authors=authors,
                        join_attachment=(
-                           "JOIN attachment ON attachment.entry_id == entry.id"
+                           "JOIN attachment ON attachment.entry_id = entry.id"
                            if attachment_filter else ""))
 
         if not archived:
@@ -716,33 +715,35 @@ class Entry(Model):
         # further filters on the results, depending on search criteria
         if content_filter:
             # need to filter out null or REGEX will explode on them
-            query += " AND entry.content IS NOT NULL AND entry.content REGEXP ?\n"
+            query += " AND entry.content IS NOT NULL AND entry.content LIKE %s\n"
             variables.append(content_filter)
         if title_filter:
-            query += " AND entry.title IS NOT NULL AND entry.title REGEXP ?\n"
+            query += " AND entry.title IS NOT NULL AND entry.title LIKE %s\n"
             variables.append(title_filter)
         if author_filter:
-            query += " AND json_extract(authors2.value, '$.name') REGEXP ?\n"
+            query += " AND json_extract(authors2.value, '$.name') LIKE %s\n"
             variables.append(author_filter)
         if attachment_filter:
-            query += " AND attachment_path REGEXP ?\n"
+            query += " AND attachment.path LIKE %s\n"
             variables.append(attachment_filter)
         if attribute_filter:
             for i, (attr, value) in enumerate(attribute_filter):
-                query += " AND attr{} LIKE ?".format(i)
+                query += " AND attr{} LIKE %s".format(i)
                 variables.append('%{}%'.format(value))
         if metadata_filter:
             for i, (meta, value) in enumerate(metadata_filter):
-                query += " AND meta{} LIKE ?".format(i)
+                query += " AND meta{} LIKE %s".format(i)
                 variables.append('{}'.format(value))
 
         # Check if we're searching, in that case we want to show all entries.
         if followups or any([title_filter, content_filter, author_filter,
-                             metadata_filter, attribute_filter, attachment_filter]):
-            query += " GROUP BY thread"
+                             metadata_filter, attribute_filter]):
+            query += " GROUP BY entry.id , thread"
+        elif attachment_filter:
+            query += " GROUP BY attachment.path, entry.id , thread"
         else:
             # We're not searching. In this case we'll only show
-            query += " GROUP BY thread HAVING entry.follows_id IS NULL"
+            query += " GROUP BY entry.id , thread HAVING entry.follows_id IS NULL"
 
         # sort newest first, taking into account the last edit if any
         # TODO: does this make sense? Should we only consider creation date?
@@ -753,6 +754,10 @@ class Entry(Model):
             if offset:
                 query += " OFFSET {}".format(offset)
         logging.debug("query=%r, variables=%r" % (query, variables))
+        print(query)
+        print(variables)
+        # Add regexp to match more
+        variables = ['%' + filt + '%' for filt in variables]
         return Entry.raw(query, *variables)
 
     @classmethod

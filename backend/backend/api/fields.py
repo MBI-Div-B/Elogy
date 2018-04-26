@@ -243,7 +243,8 @@ logbook_very_short = {
 
 class FollowupAuthorsField(fields.Raw):
     def format(self, value):
-        all_authors = sum(json.loads(value), [])
+        print(value)
+        all_authors = []
         d = OrderedDict((author["name"], None) for author in all_authors)
         return list(d.keys())
 
@@ -256,7 +257,7 @@ short_entry = {
     "priority": fields.Integer,
     "created_at": fields.DateTime,
     "last_changed_at": fields.DateTime,
-    "timestamp": DateTimeFromStringField,
+    "timestamp": fields.DateTime,
     "authors": fields.List(fields.String(attribute="name")),
     "attributes": fields.Raw,
     "followup_authors": FollowupAuthorsField(),
