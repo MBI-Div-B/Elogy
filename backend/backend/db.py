@@ -581,7 +581,7 @@ class Entry(Model):
             # extract the author names as a separate table, so that
             # they can be searched
             # TODO: maybe also take login?
-            authors = ", json_each(entry.authors) AS authors2"
+            authors = ", json_to_recordset(to_json(entry.authors::json)) AS authors2(login text, name text, email text)"
         else:
             authors = ""
 
@@ -590,7 +590,7 @@ class Entry(Model):
             # we can match on them later
             attributes = ", {}".format(
                 ", ".join(
-                    "json_extract(entry.attributes, '$.{attr}') AS {attr_id}"
+                    "json_extract_path_text(to_json(entry.attributes::json), '{attr}') AS {attr_id}"
                     .format(attr=escape_string(attr),
                             attr_id="attr{}".format(i))
                     for i, (attr, _) in enumerate(attribute_filter)))
@@ -601,7 +601,7 @@ class Entry(Model):
             # This works just like the attribute filter
             metadata = ", {}".format(
                 ", ".join(
-                    "json_extract(entry.metadata, '$.{meta}') AS {meta_id}"
+                    "json_extract_path_text(to_json(entry.metadata::json), '$.{meta}') AS {meta_id}"
                     .format(meta=escape_string(meta),
                             meta_id="meta{}".format(i))
                     for i, (meta, _) in enumerate(metadata_filter)))
@@ -639,8 +639,8 @@ class Entry(Model):
                     -- collect authors from all followups
                     array_agg(to_json(COALESCE(followup.authors, '[]'))) as followup_authors
                 FROM entry{authors}
-                JOIN logbook1 ON entry.logbook_id = logbook1.id
-                JOIN logbook2 ON entry.logbook_id = logbook2.id
+                LEFT JOIN logbook1 ON entry.logbook_id = logbook1.id
+                LEFT JOIN logbook2 ON entry.logbook_id = logbook2.id
                 JOIN logbook ON entry.logbook_id = logbook.id
                 {join_attachment}
                 LEFT JOIN entry AS followup ON entry.id = followup.follows_id
@@ -663,7 +663,7 @@ class Entry(Model):
                       coalesce(followup.follows_id, entry.id) AS thread,
                       count(followup.id) AS n_followups,
                       max(coalesce(coalesce(followup.last_changed_at,followup.created_at),
-                        coalesce(entry.last_changed_at,entry.created_at)))) AS timestamp,
+                        coalesce(entry.last_changed_at,entry.created_at))) AS timestamp,
                       array_agg(to_json(COALESCE(followup.authors, '[]'))) as followup_authors
                     FROM entry{authors}
                     {join_attachment}
@@ -689,7 +689,7 @@ class Entry(Model):
                 coalesce(followup.follows_id, entry.id) AS thread,
                 count(followup.id) AS n_followups,
                 max(coalesce(coalesce(followup.last_changed_at,followup.created_at),
-                    coalesce(entry.last_changed_at,entry.created_at)))) AS timestamp,
+                    coalesce(entry.last_changed_at,entry.created_at))) AS timestamp,
                 array_agg(to_json(COALESCE(followup.authors, '[]'))) as followup_authors
             FROM entry{authors}
             {join_attachment}
@@ -722,19 +722,17 @@ class Entry(Model):
             query += " AND entry.title IS NOT NULL AND entry.title LIKE %s\n"
             variables.append(title_filter)
         if author_filter:
-            query += " AND json_extract(authors2.value, '$.name') LIKE %s\n"
+            query += " AND json_extract_path_text(authors2.name, 'name') LIKE %s\n"
             variables.append(author_filter)
         if attachment_filter:
             query += " AND attachment.path LIKE %s\n"
             variables.append(attachment_filter)
         if attribute_filter:
             for i, (attr, value) in enumerate(attribute_filter):
-                query += " AND attr{} LIKE %s".format(i)
-                variables.append('%{}%'.format(value))
+                query += " AND json_extract_path_text(to_json(entry.attributes::json), '{attr}') LIKE '{value}'".format(attr = attr, value = value)
         if metadata_filter:
             for i, (meta, value) in enumerate(metadata_filter):
-                query += " AND meta{} LIKE %s".format(i)
-                variables.append('{}'.format(value))
+                query += " AND json_extract_path_text(to_json(entry.attributes::json), '{meta}') LIKE '{value}'".format(meta = meta, value = value)
 
         # Check if we're searching, in that case we want to show all entries.
         if followups or any([title_filter, content_filter, author_filter,
