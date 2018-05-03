@@ -577,13 +577,6 @@ class Entry(Model):
         # support recursive queries, which we need in order to search
         # through nested logbooks. Cleanup needed!
 
-        if author_filter:
-            # extract the author names as a separate table, so that
-            # they can be searched
-            # TODO: maybe also take login?
-            authors = ", json_to_recordset(to_json(entry.authors::json)) AS authors2(login text, name text, email text)"
-        else:
-            authors = ""
 
         if attribute_filter:
             # need to extract the attribute values from JSON here, so that
@@ -638,7 +631,7 @@ class Entry(Model):
                         coalesce(entry.last_changed_at,entry.created_at))) AS timestamp,
                     -- collect authors from all followups
                     array_agg(to_json(COALESCE(followup.authors, '[]'))) as followup_authors
-                FROM entry{authors}
+                FROM entry
                 LEFT JOIN logbook1 ON entry.logbook_id = logbook1.id
                 LEFT JOIN logbook2 ON entry.logbook_id = logbook2.id
                 JOIN logbook ON entry.logbook_id = logbook.id
@@ -649,7 +642,7 @@ class Entry(Model):
                       AND NOT logbook.archived
                 """.format(attachment=("attachment.path as attachment_path,"
                                        if attachment_filter else ""),
-                           authors=authors, logbook=logbook.id,
+                            logbook=logbook.id,
                            attributes=attributes,
                            metadata=metadata,
                            join_attachment=("JOIN attachment ON attachment.entry_id = entry.id"
@@ -665,14 +658,13 @@ class Entry(Model):
                       max(coalesce(coalesce(followup.last_changed_at,followup.created_at),
                         coalesce(entry.last_changed_at,entry.created_at))) AS timestamp,
                       array_agg(to_json(COALESCE(followup.authors, '[]'))) as followup_authors
-                    FROM entry{authors}
+                    FROM entry
                     {join_attachment}
                     JOIN logbook on logbook.id = entry.logbook_id
                     LEFT JOIN entry AS followup ON entry.id = followup.follows_id
                     WHERE entry.logbook_id = {logbook} AND NOT logbook.archived"""
                     .format(attachment=("attachment.path as attachment_path,"
                                        if attachment_filter else ""),
-                            authors=authors,
                             attributes=attributes,
                             metadata=metadata,
                             logbook=logbook.id,
@@ -691,7 +683,7 @@ class Entry(Model):
                 max(coalesce(coalesce(followup.last_changed_at,followup.created_at),
                     coalesce(entry.last_changed_at,entry.created_at))) AS timestamp,
                 array_agg(to_json(COALESCE(followup.authors, '[]'))) as followup_authors
-            FROM entry{authors}
+            FROM entry
             {join_attachment}
             JOIN logbook on logbook.id = entry.logbook_id
             LEFT JOIN entry AS followup ON entry.id = followup.follows_id
@@ -700,7 +692,6 @@ class Entry(Model):
                        metadata=metadata,
                        attachment=("path as attachment_path,"
                                    if attachment_filter else ""),
-                       authors=authors,
                        join_attachment=(
                            "JOIN attachment ON attachment.entry_id = entry.id"
                            if attachment_filter else ""))
@@ -722,7 +713,7 @@ class Entry(Model):
             query += " AND entry.title IS NOT NULL AND entry.title LIKE %s\n"
             variables.append(title_filter)
         if author_filter:
-            query += " AND json_extract_path_text(authors2.name, 'name') LIKE %s\n"
+            query += " AND to_json(array(select json_array_elements(entry.authors::json) ->> 'name'))::text LIKE %s\n"
             variables.append(author_filter)
         if attachment_filter:
             query += " AND attachment.path LIKE %s\n"
@@ -753,8 +744,6 @@ class Entry(Model):
             if offset:
                 query += " OFFSET {}".format(offset)
         logging.debug("query=%r, variables=%r" % (query, variables))
-        print(query)
-        print(variables)
         # Add regexp to match more
         variables = ['%' + filt + '%' for filt in variables]
         return Entry.raw(query, *variables)
