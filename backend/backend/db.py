@@ -15,7 +15,7 @@ from .utils import CustomJSONEncoder
 from peewee import PostgresqlDatabase
 
 # defer the actual db setup to later, when we have read the config
-db = PostgresqlDatabase('elogy', user='postgres', password='root', host='docker.for.mac.host.internal', port=5432)
+db = PostgresqlDatabase('elogy', user='postgres', password='root', host='db', port=5432)
 
 
 class CustomJSONField(JSONField):
