@@ -4,6 +4,7 @@ import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import update from "immutability-helper";
+import { withRouter } from 'react-router-dom';
 
 import { parseQuery } from "./util.js";
 import EntryPreviews from "./entrypreviews.js";
@@ -146,7 +147,7 @@ class Logbook extends React.Component {
 
     componentDidUpdate({ match }) {
         // set the browser title
-        document.title = `${this.state.logbook.name}`;
+        document.title = this.state.logbook.name ? `${this.state.logbook.name}` : 'Elogy';
         // make sure the entry list is scrolled to the top
         if (match.params.logbookId !== this.props.match.params.logbookId)
             findDOMNode(this.refs.entries).scrollIntoView();
@@ -231,7 +232,8 @@ class Logbook extends React.Component {
             ) : null;
 
         return (
-            <div className="container">
+            <div className={"container " + (entryId !== null ? "entry-selected" : "")}>
+                <button className="mobile-back-button" onClick={() => this.props.history.push('/')}> Back </button>
                 <header>
                     <span className="name">
                         <i className="fa fa-book" />
