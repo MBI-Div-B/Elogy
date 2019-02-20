@@ -1,6 +1,9 @@
 import os
+import re
 
 TITLE = os.getenv('ELOGY_TITLE', 'elogy')
+
+BASEURL = os.getenv('ELOGY_URL', 'https://elogy.maxiv.lu.se')
 
 DEBUG = bool(os.getenv('ELOGY_DEBUG', 1))  # !!!Change this to False for production use!!!
 
@@ -19,7 +22,8 @@ UPLOAD_FOLDER = os.getenv('ELOGY_UPLOAD_FOLDER', '/tmp/elogy')  # !!!Again, /tmp
 # to fall back to looking up users through the local system.
 LDAP_SERVER = os.getenv("ELOGY_LDAP_SERVER", "")
 LDAP_BASEDN = os.getenv("ELOGY_LDAP_BASEDN", "")
-
+LDAP_BIND_USERNAME = os.getenv("ELOGY_LDAP_BIND_USERNAME", "")
+LDAP_BIND_PASSWORD = os.getenv("ELOGY_LDAP_BIND_PASSWORD", "")
 
 # Callbacks for various events
 
@@ -51,10 +55,17 @@ def new_entry(data):
         import logging
         from smtplib import SMTP
         from email.mime.text import MIMEText
+        if "Mailfrom" in entry["attributes"]:
+            fromaddr = entry["attributes"]["Mailfrom"]
+        else:
+            fromaddr = "elogy@maxiv.lu.se"
 
-        fromaddr = "elogy@maxiv.lu.se"
         toaddrs = entry["attributes"]["Mailto"]
-        content = "<html> {} </html>".format(entry["content"])
+        linkToText = 'Sent from Elogy, original post can be found at:'
+        linkToEntry = BASEURL + '/logbooks/' + str(entry["logbook"]["id"]) + '/entries/' + str(entry["id"])
+        content = "<html> {} <br> {} </html>".format(entry["content"], linkToText + linkToEntry)
+        content = re.sub('src="', 'src="' + BASEURL, content)
+        content = re.sub('href="', 'href="' + BASEURL, content)
         message = MIMEText(content, "html")
         message["Subject"] = entry["title"]
         message["From"] = fromaddr
