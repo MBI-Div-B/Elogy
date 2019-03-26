@@ -707,7 +707,7 @@ class Entry(Model):
             for f in content_filter_array:
                 variables.append(f)
             ts_query = " && ".join(placeholder_array)
-            query += "AND to_tsvector(entry.content) @@ (" + ts_query + ")\n"
+            query += " AND entry.content IS NOT NULL AND to_tsvector(entry.content) @@ (" + ts_query + ")\n"
         if title_filter:
             #Perform a postgresql 'Full Text Search'
             title_filter_array = title_filter.split(" ")
@@ -715,7 +715,7 @@ class Entry(Model):
             for f in title_filter_array:
                 variables.append(f)
             ts_query = " && ".join(placeholder_array)
-            query += "AND to_tsvector(entry.title) @@ (" + ts_query + ")\n"
+            query += " AND entry.title IS NOT NULL AND to_tsvector(entry.title) @@ (" + ts_query + ")\n"
         if author_filter:
             #Perform a postgresql 'Full Text Search'
             author_filter_array = author_filter.split(" ")
@@ -723,7 +723,7 @@ class Entry(Model):
             for f in author_filter_array:
                 variables.append(f)
             ts_query = " && ".join(placeholder_array)
-            query += " AND to_tsvector(to_json(array(select json_array_elements(entry.authors::json) ->> 'name'))::text) @@ (" + ts_query + ")\n"
+            query += " AND entry.authors IS NOT NULL AND to_tsvector(to_json(array(select json_array_elements(entry.authors::json) ->> 'name'))::text) @@ (" + ts_query + ")\n"
         if attachment_filter:
             query += " AND attachment.path LIKE %s\n"
             variables.append(attachment_filter)

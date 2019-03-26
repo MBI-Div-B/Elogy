@@ -79,7 +79,7 @@ class QuickSearch extends React.Component {
                             style={{ width: "100%" }}
                             name="title"
                             value={this.state.title || ""}
-                            title="Filter entries on title (supports regular expressions)"
+                            title="Filter entries on title"
                             type="text"
                             ref="title"
                             placeholder="Title"
@@ -89,7 +89,7 @@ class QuickSearch extends React.Component {
                             style={{ width: "100%" }}
                             name="content"
                             value={this.state.content || ""}
-                            title="Filter entries on contents (supports regular expressions)"
+                            title="Filter entries on contents"
                             type="text"
                             ref="content"
                             placeholder="Content"
@@ -99,7 +99,7 @@ class QuickSearch extends React.Component {
                             style={{ width: "100%" }}
                             name="authors"
                             value={this.state.authors || ""}
-                            title="Filter entries on authors (supports regular expressions)"
+                            title="Filter entries on authors"
                             type="text"
                             ref="authors"
                             placeholder="Authors"
@@ -109,7 +109,7 @@ class QuickSearch extends React.Component {
                             style={{ width: "100%" }}
                             name="attachments"
                             value={this.state.attachments || ""}
-                            title="Filter entries on attachments (supports regular expressions)"
+                            title="Filter entries on attachments"
                             type="text"
                             ref="attachments"
                             placeholder="Attachments"
