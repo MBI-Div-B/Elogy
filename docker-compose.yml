@@ -12,8 +12,8 @@ services:
   backend:
     build: backend
     restart: always
-    # depends_on:
-    #   - "db"
+    depends_on:
+      - "db"
     environment:
       - 'ELOGY_DEBUG=0'
       - 'ELOGY_DATABASE=/var/elogy/db/elogy.db'
@@ -35,10 +35,10 @@ services:
       # Change the part to the left of : to select
       # where files end up in the host filesystem.
       - /tmp/elogy/log/frontend:/var/log/nginx
-  # db:
-  #   image: postgres
-  #   restart: always
-  #   environment:
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: root
-  #     POSTGRES_DB: elogy
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: elogy
