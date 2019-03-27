@@ -34,10 +34,13 @@ export class InnerEntry extends React.Component {
     }
 
     highlightContentFilter() {
-        // highlight the current content filter string in the content
+        // highlight the current content filter strings (each word) in the content
         if (this.props.contentFilter) {
             const mark = new Mark(findDOMNode(this.refs.content));
-            mark.markRegExp(new RegExp(this.props.contentFilter, "gmi"));
+            mark.mark(this.props.contentFilter,{
+                "separateWordSearch": true,
+                "caseSensitive": false,
+            });
         }
     }
 

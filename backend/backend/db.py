@@ -8,14 +8,14 @@ from flask import url_for
 from playhouse.sqlite_ext import JSONField, fn
 from peewee import (IntegerField, CharField, TextField, BooleanField,
                     DateTimeField, ForeignKeyField, sqlite3)
-from peewee import Model, DoesNotExist, DeferredRelation, Entity
+from peewee import Model, DoesNotExist, Entity
 
 from .utils import CustomJSONEncoder
 
 from peewee import PostgresqlDatabase
 
 # defer the actual db setup to later, when we have read the config
-db = PostgresqlDatabase('elogy', user='postgres', password='root', host='docker.for.mac.localhost', port=5432)
+db = PostgresqlDatabase('elogy', user='postgres', password='root', host='db', port=5432)
 
 
 class CustomJSONField(JSONField):
@@ -350,7 +350,7 @@ class LogbookRevision:
         return getattr(self.change.logbook, attr)
 
 
-DeferredEntry = DeferredRelation()
+# DeferredEntry = DeferredRelation()
 
 
 # class EntrySearch(FTS5Model):
@@ -700,21 +700,30 @@ class Entry(Model):
             query += " AND NOT entry.archived\n"
 
         variables = []
-
-        # if not followups:
-        #     query += " AND entry.follows_id IS NULL"
-
-        # further filters on the results, depending on search criteria
         if content_filter:
-            # need to filter out null or REGEX will explode on them
-            query += " AND entry.content IS NOT NULL AND entry.content LIKE %s\n"
-            variables.append(content_filter)
+            #Perform a postgresql 'Full Text Search'
+            content_filter_array = content_filter.split(" ")
+            placeholder_array = ["to_tsquery(%s)"] * len(content_filter_array)
+            for f in content_filter_array:
+                variables.append(f)
+            ts_query = " && ".join(placeholder_array)
+            query += " AND entry.content IS NOT NULL AND to_tsvector(entry.content) @@ (" + ts_query + ")\n"
         if title_filter:
-            query += " AND entry.title IS NOT NULL AND entry.title LIKE %s\n"
-            variables.append(title_filter)
+            #Perform a postgresql 'Full Text Search'
+            title_filter_array = title_filter.split(" ")
+            placeholder_array = ["to_tsquery(%s)"] * len(title_filter_array) 
+            for f in title_filter_array:
+                variables.append(f)
+            ts_query = " && ".join(placeholder_array)
+            query += " AND entry.title IS NOT NULL AND to_tsvector(entry.title) @@ (" + ts_query + ")\n"
         if author_filter:
-            query += " AND to_json(array(select json_array_elements(entry.authors::json) ->> 'name'))::text LIKE %s\n"
-            variables.append(author_filter)
+            #Perform a postgresql 'Full Text Search'
+            author_filter_array = author_filter.split(" ")
+            placeholder_array = ["to_tsquery(%s)"] * len(author_filter_array) 
+            for f in author_filter_array:
+                variables.append(f)
+            ts_query = " && ".join(placeholder_array)
+            query += " AND entry.authors IS NOT NULL AND to_tsvector(to_json(array(select json_array_elements(entry.authors::json) ->> 'name'))::text) @@ (" + ts_query + ")\n"
         if attachment_filter:
             query += " AND attachment.path LIKE %s\n"
             variables.append(attachment_filter)
@@ -824,7 +833,7 @@ class Entry(Model):
         return result
 
 
-DeferredEntry.set_model(Entry)
+#DeferredEntry.set_model(Entry)
 
 
 class EntryChange(Model):
