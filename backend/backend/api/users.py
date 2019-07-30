@@ -17,20 +17,32 @@ def search_ldap(server, basedn, search, max_results=20):
 
     l = ldap.initialize("ldap://" + server)
 
+    LDAP_BIND_USERNAME = current_app.config.get("LDAP_BIND_USERNAME")
+    LDAP_BIND_PASSWORD = current_app.config.get("LDAP_BIND_PASSWORD")
+    LDAP_USERNAME_ATTRIBUTE = current_app.config.get("LDAP_USERNAME_ATTRIBUTE")
+
+    # Some ldap connections requires a bind user to search, check if that's the case
+    if LDAP_BIND_USERNAME and LDAP_BIND_PASSWORD:
+        l.set_option(ldap.OPT_REFERRALS, 0)
+        l.bind_s(LDAP_BIND_USERNAME, LDAP_BIND_PASSWORD)
+
     # partial match against full name OR login
     if search:
-        search_user = "(|(cn=*{search}*)(uid=*{search}*))".format(search=search)
+        search_user = "(|(cn=*{search}*)({username_attr}=*{search}*))".format(
+            username_attr=LDAP_USERNAME_ATTRIBUTE,
+            search=search
+        )
     else:
         search_user = "cn=*"
 
-    ldap_attributes = ["uid", "cn", "mail"]
+    ldap_attributes = [LDAP_USERNAME_ATTRIBUTE] + ["cn", "mail"]
     attributes = ["login", "name", "email"]
     results = l.search_s(basedn, ldap.SCOPE_SUBTREE, filterstr=search_user,
                          attrlist=ldap_attributes)
     final_results = []
     for result in results:
         _, result_data = result
-        if "uid" not in result_data:
+        if LDAP_USERNAME_ATTRIBUTE not in result_data:
             # users without login probably aren't people
             continue
         final_results.append({
@@ -40,7 +52,10 @@ def search_ldap(server, basedn, search, max_results=20):
         })
         if len(final_results) == max_results:
             break
+
+    # Why is this line commented? (And has been for a long time)
     # l.unbind_s()  # disconnect
+
     return final_results
 
 
@@ -78,7 +93,7 @@ class UsersResource(Resource):
         # if LDAP is configured, let's check that
         LDAP_SERVER = current_app.config.get("LDAP_SERVER")
         LDAP_BASEDN = current_app.config.get("LDAP_BASEDN")
-        if LDAP_SERVER and LDAP_BASEDN:
+        if LDAP_SERVER and LDAP_BASEDN and len(search) > 1:
             return search_ldap(LDAP_SERVER, LDAP_BASEDN, search)
 
         # otherwise check for local users
