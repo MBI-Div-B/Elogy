@@ -54,7 +54,8 @@ export class LogbookSelector extends React.Component {
         const options = flattenLogbook(this.state.logbook)
             .filter(([logbook, ancestors]) => !ancestors.includes(this.props.currentName) && logbook.id !== this.props.currentId)
             .map(([logbook, ancestors]) => (
-                <LogbookOption logbook={logbook}
+                <LogbookOption key={logbook.id}
+                               logbook={logbook}
                                current={logbook.id === this.props.currentParentId}
                                ancestors={ancestors}/>));
         
