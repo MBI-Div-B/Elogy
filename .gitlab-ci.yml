@@ -1,4 +1,6 @@
 before_script:
+  - ifconfig
+  - uname -a
   - docker info
 
 build_backend_test_image:
