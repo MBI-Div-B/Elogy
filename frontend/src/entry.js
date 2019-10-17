@@ -31,7 +31,6 @@ export class InnerEntry extends React.Component {
 
   download() {
     const url = `/api/download/?id=${this.props.id}`;
-    this.setState({ loading: true });
     fetch(url, {
       method: "GET",
       headers: { Accept: "application/pdf" }
