@@ -2,3 +2,6 @@
 .gitignore
 
 frontend/node_modules
+backend/backend/__pycache__
+backend/backend/api/__pycache__
+.vscode/tags

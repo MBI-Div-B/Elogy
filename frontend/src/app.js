@@ -54,7 +54,7 @@ class NoEntry extends React.Component {
     // a dummy for when no entry is selected
 
     render() {
-        const logbookId = parseInt(this.props.match.params.logbookId);
+        const logbookId = parseInt(this.props.match.params.logbookId, 10);
 
         return (
             <div className="empty">
