@@ -144,8 +144,7 @@ var TinyMCEInput = createReactClass({
         }
     },
     setupPassthroughEvents: function(editor) {
-        var _this = this,
-            event;
+        var _this = this;
 
         /* eslint-disable no-loop-func */
         for (var i = 0, len = DIRECT_PASSTHROUGH_EVENTS.length; i < len; ++i) {
