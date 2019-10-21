@@ -426,6 +426,10 @@ class Entry(Model):
         pass
 
     @property
+    def followups(self):
+        return Entry.select().where((Entry.follows_id == self.id))
+
+    @property
     def _thread(self):
         entries = []
         if self.follows:

@@ -1,54 +1,27 @@
 from tempfile import NamedTemporaryFile
 
-try:
-    import pdfkit
-except ImportError:
-    pdfkit = None
+import sys
+from weasyprint import HTML, CSS
 
-
-def export_entries_as_pdf(logbook, entries):
+def export_entries_as_pdf(entry):
 
     """
-    Super basic "proof-of-concept" PDF export
-    No proper formatting, and does not embed images.
-    Note that pdfkit relies on the external library "wkhtmltopdf".
-    TODO: pdfkit seems a bit limited, look for a more flexible alternative.
-    "reportlab" looks pretty good (https://bitbucket.org/rptlab/reportlab)
+    Exports an elogy entry as a pdf
     """
 
-    if pdfkit is None:
-        return None
-
-    entries_html = [
-        """
-        <p><b>Created at:</b> {created_at}</p>
-        <p><b>Title:</b> {title}</p>
-        <p><b>Authors:</b> {authors}</p>
-        <p>{content}</p>
-        """.format(title=entry.title or "(No title)",
+    filename = '/tmp/' + str(entry.id) + '.pdf'
+    html_header = "<html><head><style></style></head><body>"
+    html_footer = "</body></html>"
+    entry_html = "<div><p><b>URL:</b> <a href=\"elogy.maxiv.lu.se/logbooks/{logbook_id}/entries/{id}/\">elogy.maxiv.lu.se/logbooks/{logbook_id}/entries/{id}/</a></p><p><b>Created at:</b> {created_at}</p><p><b>Title:</b> {title}</p><p><b>Authors:</b> {authors}</p></div><div>{content}</div><hr/>".format(title=entry.title or "(No title)",
                    authors=", ".join(a["name"] for a in entry.authors),
                    created_at=entry.created_at,
+                   id=entry.id,
+                   logbook_id=entry.logbook_id,
                    content=entry.content or "---")
-        for entry in entries
-    ]
-
-    with NamedTemporaryFile(prefix=logbook.name,
-                            suffix=".pdf",
-                            delete=False) as f:
-        options = {
-            "load-error-handling": "ignore",
-            "load-media-error-handling": "ignore",
-            'margin-top': '0.75in',
-            'margin-right': '0.75in',
-            'margin-bottom': '0.75in',
-            'margin-left': '0.75in',
-            'encoding': "UTF-8",
-        }
-        try:
-            pdfkit.from_string("<hr>".join(entries_html), f.name, options)
-        except OSError:
-            # Apparently there's some issue with wkhtmltopdf which produces
-            # errors, but it works anyway. See
-            # https://github.com/wkhtmltopdf/wkhtmltopdf/issues/2051
-            pass
-        return f.name
+    for followup in entry.followups:
+        entry_html = entry_html + "<div><b>Followup created at:</b> {created_at}</p><p><b>Authors:</b> {authors}</p></div><hr/><div>{content}</div>".format(
+                authors=", ".join(a["name"] for a in followup.authors),
+                created_at=followup.created_at,
+                content=followup.content or "---")
+    HTML(string=(html_header + entry_html + html_footer)).write_pdf(filename)
+    return filename

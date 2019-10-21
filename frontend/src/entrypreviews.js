@@ -149,7 +149,7 @@ const EntryPreviews = ({ logbook, entries, selectedEntryId, search, sortBy = "cr
        This seems to be true, but AFAIK it's not really guaranteed... */
     const entryPreviews = Object.keys(dateGroups).map(priorityAndDate => {
         let [priority, date] = priorityAndDate.split("@");
-        let priorityGroup = getPriorityGroup(-parseInt(priority));
+        let priorityGroup = getPriorityGroup(-parseInt(priority, 10));
         let group = priorityGroup || date;
         return (
             <dl key={priorityAndDate} className="date-group">
@@ -165,7 +165,7 @@ const EntryPreviews = ({ logbook, entries, selectedEntryId, search, sortBy = "cr
                             "entry " +
                             (selectedEntryId === entry.id ? " selected " : "") +
                             (priorityGroup || "") +
-                            (entry.logbook.id == logbook.id ? " native" : "")
+                            (entry.logbook.id === logbook.id ? " native" : "")
                         }
                     >
                         <EntryPreview

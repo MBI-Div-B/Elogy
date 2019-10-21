@@ -1,5 +1,5 @@
 import logging
-
+import sys
 from flask import request, send_file
 from flask_restful import Resource, marshal, marshal_with, abort
 from webargs.fields import (Integer, Str, Boolean, Dict, List,
@@ -34,6 +34,20 @@ entry_args = {
     "priority": Integer(missing=0),
     "revision_n": Integer(),
 }
+
+
+class EntryDownloadResource(Resource):
+
+    "Handle request for an entry download"
+    
+    @use_args({"id": Integer(allow_none=False)})
+    def get(self, args):
+        entry = Entry.get(Entry.id == args["id"])
+        pdf = export_entries_as_pdf(entry)
+        if pdf is None:
+            abort(400, message="Could not create PDF!")
+
+        return send_file(pdf, mimetype="application/pdf", as_attachment=True, attachment_filename=(pdf))
 
 
 class EntryResource(Resource):
@@ -73,7 +87,8 @@ class EntryResource(Resource):
         args["logbook"] = logbook
         # make sure the attributes are of proper types
         try:
-            args["attributes"] = logbook.check_attributes(args.get("attributes", {}))
+            args["attributes"] = logbook.check_attributes(
+                args.get("attributes", {}))
         except ValueError as e:
             abort(422, messages={"attributes": [str(e)]})
         if args.get("follows_id"):
@@ -185,18 +200,6 @@ class EntriesResource(Resource):
                                n=args["n"], offset=args.get("offset"),
                                sort_by_timestamp=args.get("sort_by_timestamp"))
             entries = Entry.search(**search_args)
-
-        if args.get("download") == "pdf":
-            # return a PDF version
-            # TODO: not sure if this belongs in the API
-            pdf = export_entries_as_pdf(logbook, entries)
-            if pdf is None:
-                abort(400, message="Could not create PDF!")
-            return send_file(pdf, mimetype="application/pdf",
-                             as_attachment=True,
-                             attachment_filename=("{logbook.name}.pdf"
-                                                  .format(logbook=logbook)))
-
         return marshal(dict(logbook=logbook,
                             entries=list(entries)), fields.entries)
 
