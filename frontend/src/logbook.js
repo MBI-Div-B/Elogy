@@ -54,7 +54,7 @@ class Logbook extends React.Component {
             attributes;
 
         const sortByTimestamp = sortBy === 'modified';
-        const url = `/api/logbooks/${logbookId || 0}/entries/?${newSearch || ""}&sort_by_timestamp=${sortByTimestamp}`;
+        const url = `/api/logbooks/${logbookId || 0}/entries/?${newSearch || ""}&sort_by=${sortBy}&sort_by_timestamp=${sortByTimestamp}`;
 
         this.setState({ loading: true });
         fetch(url, {
