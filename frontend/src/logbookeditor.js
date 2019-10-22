@@ -124,16 +124,16 @@ class LogbookEditorBase extends React.Component {
                 <fieldset key={i}>
                     <legend>
                         {i}
-                        <button onClick={this.removeAttribute.bind(this, i)}>
+                        <button type="button" onClick={this.removeAttribute.bind(this, i)}>
                             <i className="fa fa-trash" />
                         </button>
-                        <button onClick={this.insertAttribute.bind(this, i)}>
+                        <button type="button" onClick={this.insertAttribute.bind(this, i)}>
                             <i className="fa fa-plus" />
                         </button>
-                        <button onClick={this.moveAttribute.bind(this, i, -1)}>
+                        <button type="button" onClick={this.moveAttribute.bind(this, i, -1)}>
                             <i className="fa fa-arrow-up" />
                         </button>
-                        <button onClick={this.moveAttribute.bind(this, i, 1)}>
+                        <button type="button" onClick={this.moveAttribute.bind(this, i, 1)}>
                             <i className="fa fa-arrow-down" />
                         </button>
                     </legend>
@@ -373,6 +373,7 @@ class LogbookEditorNew extends LogbookEditorBase {
                         </legend>
                         <div className="attributes">{this.getAttributes()}</div>
                         <button
+                            type="button"
                             onClick={this.insertAttribute.bind(
                                 this,
                                 this.state.attributes.length
@@ -537,6 +538,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
                         <legend>Attributes</legend>
                         <div className="attributes">{this.getAttributes()}</div>
                         <button
+                            type="button"
                             onClick={this.insertAttribute.bind(
                                 this,
                                 this.state.attributes.length

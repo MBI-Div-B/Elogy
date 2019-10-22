@@ -4,7 +4,6 @@ import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import update from "immutability-helper";
-import { withRouter } from 'react-router-dom';
 
 import { parseQuery } from "./util.js";
 import EntryPreviews from "./entrypreviews.js";

@@ -44,9 +44,6 @@ class LogbookTreeNode extends React.Component {
                 </span>
             ) : null;
 
-        // make sure we keep any parent setting
-        const query = parseQuery(this.props.search);
-
         return (
             <li
                 key={this.props.id}
