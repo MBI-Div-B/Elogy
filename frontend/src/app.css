@@ -57,6 +57,18 @@ a {
     }
 }
 
+.link-button{
+    border: none;
+    background: none;
+    outline: none;
+    color: -webkit-link;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    font-size: inherit;
+    padding: 0 0.3em;
+}
+
  /* All CSS below is for making Elogy mobile compatible */
 
 .mobile-back-button{
