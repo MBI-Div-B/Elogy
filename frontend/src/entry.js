@@ -4,7 +4,7 @@ import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import Mark from "mark.js";
-
+import {bottomLabel} from "./widgets.js";
 import "./entry.css";
 import { formatDateTimeString } from "./util.js";
 import { parseQuery } from "./util.js";
@@ -18,6 +18,7 @@ export class InnerEntry extends React.Component {
   constructor() {
     super();
     this.download = this.download.bind(this);
+    this.state = {downloading: false}
   }
   componentDidMount() {
     this.highlightContentFilter();
@@ -30,13 +31,15 @@ export class InnerEntry extends React.Component {
   }
 
   download() {
-    const url = `/api/download/?id=${this.props.id}`;
+    this.setState({ downloading: true });
+    const url = `/api/download/?entry_id=${this.props.id}`;
     fetch(url, {
       method: "GET",
       headers: { Accept: "application/pdf" }
     })
       .then(response => response.blob())
       .then(blob => {
+        this.setState({ downloading: false });
         var newBlob = new Blob([blob], { type: "application/pdf" });
 
         // IE doesn't allow using a blob object directly as link href
@@ -51,7 +54,7 @@ export class InnerEntry extends React.Component {
         const data = window.URL.createObjectURL(newBlob);
         var link = document.createElement("a");
         link.href = data;
-        link.download = "elogy_entry_" + this.props.id + ".pdf";
+        link.download = "elogy_entry_" + this.props.id + ".html";
         link.click();
         setTimeout(function() {
           // For Firefox it is necessary to delay revoking the ObjectURL
@@ -76,6 +79,7 @@ export class InnerEntry extends React.Component {
   }
 
   render() {
+    const {downloading} = this.state;
     const logbook = this.props.logbook;
     const followups = this.props.followups
       ? this.props.followups.map((followup, i) => (
@@ -170,6 +174,7 @@ export class InnerEntry extends React.Component {
     ) : null;
     return (
       <div>
+        {downloading && bottomLabel("Downloading entry, please wait...")}
         <article ref="article">
           <div
             className={
@@ -183,7 +188,7 @@ export class InnerEntry extends React.Component {
             <div className="commands">
               <button
                 className="link-button"
-                title={`Download the logbook '${logbook.name}' as a pdf`}
+                title={`Download this entry as a html file`}
                 onClick={() => this.download(logbook.id)}
               >
                 Download
@@ -221,6 +226,7 @@ class Entry extends React.Component {
     super();
     this.state = {
       loading: false,
+      downloading: false,
       id: null,
       logbook: null,
       title: "",

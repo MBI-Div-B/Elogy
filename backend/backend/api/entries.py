@@ -8,7 +8,7 @@ from webargs.flaskparser import use_args
 
 from ..db import Entry, Logbook, EntryLock
 from ..attachments import handle_img_tags
-from ..export import export_entries_as_pdf
+from ..export import export_entry_as_html, export_logbook_as_html
 from ..actions import new_entry, edit_entry
 from . import fields, send_signal
 
@@ -40,14 +40,23 @@ class EntryDownloadResource(Resource):
 
     "Handle request for an entry download"
     
-    @use_args({"id": Integer(allow_none=False)})
+    @use_args({"entry_id": Integer(allow_none=True), "logbook_id": Integer(allow_none=True)})
     def get(self, args):
-        entry = Entry.get(Entry.id == args["id"])
-        pdf = export_entries_as_pdf(entry)
-        if pdf is None:
-            abort(400, message="Could not create PDF!")
+        html  = ""
+        if "entry_id" in args:
+            try:
+                html = export_entry_as_html(args["entry_id"])
+            except Exception:
+                abort(500, message=(
+                "The entry could not be exported"))
+        if "logbook_id" in args:
+            try:
+                html = export_logbook_as_html(args["logbook_id"])
+            except Exception:
+                abort(500, message=(
+                "The logbook could not be exported"))
 
-        return send_file(pdf, mimetype="application/pdf", as_attachment=True, attachment_filename=(pdf))
+        return send_file(html, mimetype="application/pdf", as_attachment=True, attachment_filename=(html))
 
 
 class EntryResource(Resource):
