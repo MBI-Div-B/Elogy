@@ -496,12 +496,15 @@ class EntryEditorBase extends React.Component {
     getCancelButton() {
         return this.state.entry ? (
             <Link
-                to={`/logbooks/${this.state.logbook.id}/entries/${this.state
-                    .entry.id}`}
-                title="Abandon edits without uploading."
-            >
-                <button className="cancel">Cancel</button>
-            </Link>
+            to={`/logbooks/${this.state.logbook.id}/entries/${this.state
+                .entry.id}`}
+            title="Abandon edits without uploading."
+        >
+            <button onClick={() => {
+                    this.releaseLock(this.state.logbook.id, this.state.entry.id, this.state.lock.id);
+                    this.setState({redirect: `/logbooks/${this.state.logbook.id}/entries/${this.state.entry.id}`})
+                    }} className="cancel">Cancel</button>
+        </Link>
         ) : (
             <Link
                 to={`/logbooks/${this.state.logbook.id}/`}
@@ -511,7 +514,15 @@ class EntryEditorBase extends React.Component {
             </Link>
         );
     }
-
+    releaseLock(logbookId, entryId, id){
+        try{
+            return fetch(
+                `/api/logbooks/${logbookId}/entries/${entryId}/lock?lock_id=${id}`,
+                { method: "DELETE" }
+            );
+        }catch(err){
+        }
+    }
     getError() {
         // TODO: some nicer formatting of the errors, this is terrible...
         if (this.state.error) {

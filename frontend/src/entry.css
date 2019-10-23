@@ -186,17 +186,6 @@
     padding: 3px;
     border: 1px solid #ccc;
 }
-.link-button{
-    border: none;
-    background: none;
-    outline: none;
-    color: -webkit-link;
-    cursor: pointer;
-    text-decoration: underline;
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    font-size: inherit;
-    padding: 0 0.3em;
-}
 
 #entry article .info.current {
     /*border-left: 3px solid orange;*/
