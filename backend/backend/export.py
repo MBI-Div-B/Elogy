@@ -7,7 +7,7 @@ import os
 from flask import current_app
 from weasyprint import HTML, CSS
 
-HTML_HEADER = "<html><head><style>h3 {margin: 0em 0em 0.3em 0em; display: inline-block;} body {font-family: Avenir, Helvetica, Arial; sans-serif;} .float-right {float: right} .container{max-width: 1200px; margin: auto;} .content {padding: 1em} .attachments {border-bottom: 1px solid #ccc; font-weight: bold} .followup{border-left: 5px solid #ccc; margin-left: 0.5em; padding-left: 0.5em} .subtitle {font-size: 0.9em;} .meta{margin-top: 0.5em; border-radius: 2px; border: 1px solid #fbfb8b; background: #ffffdb; padding: 0.5em;}</style></head><body><div class='container'>"
+HTML_HEADER = "<html><head><meta charset='utf-8'><style>h3 {margin: 0em 0em 0.3em 0em; display: inline-block;} body {font-family: Avenir, Helvetica, Arial; sans-serif;} .float-right {float: right} .container{max-width: 1200px; margin: auto;} .content {padding: 1em} .attachments {border-bottom: 1px solid #ccc; font-weight: bold} .inline-image {max-width: 100%} .followup{border-left: 5px solid #ccc; margin-left: 0.5em; padding-left: 0.5em} .subtitle {font-size: 0.9em;} .meta{margin-top: 0.5em; border-radius: 2px; border: 1px solid #fbfb8b; background: #ffffdb; padding: 0.5em;}</style></head><body><div class='container'>"
 HTML_FOOTER = "</div></body></html>"
 
 def export_logbook_as_html(logbook_id):
@@ -51,7 +51,7 @@ def get_entry_as_html(entry):
     if attachments:
         entry_html = entry_html + "<div class='attachments'>Attachments</div>"
     for attachment in attachments:
-        entry_html = entry_html + "<img src='data:image/png;base64, " + str(get_attachment_base64(attachment)) + "'/>"
+        entry_html = entry_html + "<img class='inline-image' src='data:image/png;base64, " + str(get_attachment_base64(attachment)) + "'/>"
     return entry_html
     
 def export_entry_as_html(entry_id):
