@@ -46,6 +46,9 @@ setup_admin(app)
 @app.after_request
 def per_request_callbacks(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+    response.headers["Expires"] = '0'
+    response.headers["Pragma"] = "no-cache"
     return response
 
 
