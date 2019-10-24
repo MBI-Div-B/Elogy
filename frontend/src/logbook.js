@@ -47,7 +47,6 @@ class Logbook extends React.Component {
       .then(response => response.blob())
       .then(blob => {
         var newBlob = new Blob([blob], { type: "application/pdf" });
-        this.setState({downloading: false})
         // IE doesn't allow using a blob object directly as link href
         // instead it is necessary to use msSaveOrOpenBlob
         if (window.navigator && window.navigator.msSaveOrOpenBlob) {
@@ -60,12 +59,16 @@ class Logbook extends React.Component {
         const data = window.URL.createObjectURL(newBlob);
         var link = document.createElement("a");
         link.href = data;
+        link.setAttribute("type", "hidden");
         link.download = "elogy_logbook_" + this.state.logbook.id + ".html";
+        document.body.appendChild(link);
         link.click();
         setTimeout(function() {
           // For Firefox it is necessary to delay revoking the ObjectURL
           window.URL.revokeObjectURL(data);
-        }, 100);
+          link.remove();
+        }, 1000);
+        this.setState({downloading: false})
       });
   }
 
