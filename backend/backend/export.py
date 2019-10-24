@@ -44,11 +44,18 @@ def get_entry_as_html(entry):
     Exports an elogy entry as a html
     """
     attach_sources = re.findall('src="/attachments([^"]+)"', entry.content)
+    # attach_sources = re.findall('(src="/attachments([^"]+)")|(src=\'/attachments([^"]+)\')', entry.content)
     new_content = entry.content
     for attach_source in attach_sources:
         base64 = get_attachment_base64(attach_source)
-        new_content = new_content.replace('class="inline-image" src="/attachments' + attach_source, 'src="data:image/png;base64, ' + base64)
+        new_content = new_content.replace('src="/attachments' + attach_source, 'class="inline-image" src="data:image/png;base64, ' + base64)
     
+
+    # attach_sources2 = re.findall("src='/attachments([^']+)'", entry.content)
+    # for attach_source in attach_sources2:
+    #     base64 = get_attachment_base64(attach_source)
+    #     new_content = new_content.replace("src='/attachments" + attach_source, "class='inline-image' src='data:image/png;base64, " + base64)
+
     entry_html = "<div class='meta'><h3><a name='{id}'>{title}</a></h3><div class='subtitle float-right'><a href=\"https://elogy.maxiv.lu.se/logbooks/{logbook_id}/entries/{id}/\">elogy.maxiv.lu.se/logbooks/{logbook_id}/entries/{id}/</a></div><div class='subtitle'>Created {created_at} by {authors}</div></div><div class='content'>{content}</div>".format(title=entry.title or "(No title)",
                 authors=", ".join(a["name"] for a in entry.authors),
                 created_at=entry.created_at.strftime('%Y-%m-%d %H:%M'),
