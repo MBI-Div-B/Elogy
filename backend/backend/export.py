@@ -28,7 +28,7 @@ def export_logbook_as_html(logbook_id):
     return filename
 
 def get_attachment_base64(attachment_path):
-    if not attachment_path.startswith("/"):
+    if attachment_path is not None and not attachment_path.startswith("/"):
         attachment_path = "/" + attachment_path
     filename = current_app.config["UPLOAD_FOLDER"] + attachment_path
     # filename = os.path.join(current_app.config["UPLOAD_FOLDER"], attachment_path)
@@ -61,7 +61,7 @@ def get_entry_as_html(entry):
                 created_at=followup.created_at.strftime('%Y-%m-%d %H:%M'),
                 content=followup.content or "---")
     attachments = entry.get_attachments()
-    filtered_attachments = [x for x in attachments if x.content_type.startswith("image")]
+    filtered_attachments = [x for x in attachments if x.content_type is not None and x.content_type.startswith("image")]
     # filtered_attachments = list(filter(lambda x : x.content_type.startswith("image"), attachments))
     if filtered_attachments:
         entry_html = entry_html + "<div class='attachments'>Attachments</div>"
