@@ -107,6 +107,10 @@ class Logbook(Model):
         "Convenient way to query for entries in this logbook"
         return Entry.search(logbook=self, **kwargs)
 
+    def get_all_entries(self):
+        return Entry.select().where(Entry.logbook_id == self.id)
+        # return Entry.raw("select * from entry where logbook_id = " + str(self.id) + " order by last_changed_at desc")
+
     @property
     def ancestors(self):
         "The list of parent, grandparent, ..."
