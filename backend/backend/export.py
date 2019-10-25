@@ -7,11 +7,12 @@ import os
 from flask import current_app
 from weasyprint import HTML, CSS
 import re
+import zipfile
 
-HTML_HEADER = "<html><head><meta charset='utf-8'><style>ul{background: #f0f0f0; padding: 1em 3em;} a[href]:hover{text-decoration: underline} a[href] {text-decoration: none; color: #3962a5} h3 {margin: 0em 0em 0.3em 0em; display: inline-block;} body {font-family: Avenir, Helvetica, Arial; sans-serif;} .float-right {float: right} .container{max-width: 1200px; margin: auto;} .content {padding: 1em} .attachments {border-bottom: 1px solid #ccc; font-weight: bold} .inline-image {max-width: 100%} .followup{border-left: 5px solid #ccc; margin-left: 0.5em; padding-left: 0.5em} .subtitle {font-size: 0.9em;} .meta{margin-top: 0.5em; border-radius: 1px; border: 1px solid #eaeaea; background: #fbfbe5; padding: 0.5em;} .entry{background: #fff}</style></head><body><div class='container'>"
+HTML_HEADER = "<html><head><meta charset='utf-8'><style>table{border: 1px solid #aaa; border-collapse: collapse;} th{border: 1px solid #aaa;} td{border: 1px solid #aaa;} ul{background: #f0f0f0; padding: 1em 3em;} a[href]:hover{text-decoration: underline} a[href] {text-decoration: none; color: #3962a5} h3 {margin: 0em 0em 0.3em 0em; display: inline-block;} body {font-family: Avenir, Helvetica, Arial; sans-serif;} .float-right {float: right} .container{max-width: 1200px; margin: auto;} .content {padding: 1em} .attachments {border-bottom: 1px solid #ccc; font-weight: bold} .inline-image {max-width: 100%} .followup{border-left: 5px solid #ccc; margin-left: 0.5em; padding-left: 0.5em} .subtitle {font-size: 0.9em;} .meta{margin-top: 0.5em; border-radius: 1px; border: 1px solid #eaeaea; background: #fbfbe5; padding: 0.5em;} .entry{background: #fff}</style></head><body><div class='container'>"
 HTML_FOOTER = "</div></body></html>"
 
-def export_logbook_as_html(logbook_id):
+def export_logbook_as_html(logbook_id, include_attachments):
     """
     Exports a logbook as a html file
     """
@@ -22,10 +23,15 @@ def export_logbook_as_html(logbook_id):
         html_body = html_body + get_entry_as_html(entry)
         table_of_content   = table_of_content + "<li><a href='#" + str(entry.id) + "'>" + (entry.title or "(No title)") + "</a> </li>"
     table_of_content = table_of_content + "</ul></div>"
-    filename = '/tmp/' + str(logbook_id) + '_' + str(int(round(time.time() * 1000))) + '.html'
-    with open(filename, 'w') as f:
+    file_id = str(logbook_id) + '_' + str(int(round(time.time() * 1000)))
+    html_file = '/tmp/' + file_id + '.html'
+    zip_file = "/tmp/"  + file_id + ".zip"
+    with open(html_file, 'w') as f:
         f.write(HTML_HEADER + table_of_content + html_body + HTML_FOOTER)
-    return filename
+    if include_attachments:
+        zip_html_and_attachments(html_file, "logbook_" + str(logbook.id) + '.html', logbook.get_all_attachments(), zip_file)
+        return zip_file
+    return html_file
 
 def get_attachment_base64(attachment_path):
     if attachment_path is not None and not attachment_path.startswith("/"):
@@ -67,23 +73,39 @@ def get_entry_as_html(entry):
                 authors=", ".join(a["name"] for a in followup.authors),
                 created_at=followup.created_at.strftime('%Y-%m-%d %H:%M'),
                 content=followup.content or "---")
-    attachments = entry.get_attachments()
-    filtered_attachments = [x for x in attachments if x.content_type is not None and x.content_type.startswith("image")]
-    # filtered_attachments = list(filter(lambda x : x.content_type.startswith("image"), attachments))
-    if filtered_attachments:
-        entry_html = entry_html + "<div class='attachments'>Attachments</div>"
-    for attachment in filtered_attachments:
-        entry_html = entry_html + "<img class='inline-image' src='data:image/png;base64, " + str(get_attachment_base64(attachment.path)) + "'/>"
+    # We now ignore the attachments in the html file, since they're added to the zip file instead
+    # attachments = entry.get_attachments()
+    # filtered_attachments = [x for x in attachments if x.content_type is not None and x.content_type.startswith("image")]
+    # if filtered_attachments:
+    #     entry_html = entry_html + "<div class='attachments'>Attachments</div>"
+    # for attachment in filtered_attachments:
+    #     entry_html = entry_html + "<img class='inline-image' src='data:image/png;base64, " + str(get_attachment_base64(attachment.path)) + "'/>"
     return "<div class='entry'>" + entry_html + "</div>"
     
-def export_entry_as_html(entry_id):
+def export_entry_as_html(entry_id, include_attachments):
 
     """
     Exports an elogy entry as a pdf
     """
     entry = Entry.get(Entry.id == entry_id)
-    filename = '/tmp/' + str(entry_id) + '_' + str(int(round(time.time() * 1000))) + '.html'
-    with open(filename, 'w') as f:
+    file_id = str(entry_id) + '_' + str(int(round(time.time() * 1000)))
+    html_file = '/tmp/' + file_id + '.html'
+    zip_file = "/tmp/"  + file_id + ".zip"
+    with open(html_file, 'w') as f:
         f.write(HTML_HEADER + get_entry_as_html(entry) + HTML_FOOTER)
+    if include_attachments:
+        zip_html_and_attachments(html_file, "entry_" + str(entry.id) + '.html', entry.get_attachments(), zip_file)
+        return zip_file
+    return html_file
 
-    return filename
+def zip_html_and_attachments(html_file, html_file_name, attachments, destination):
+    root_dir = current_app.config["UPLOAD_FOLDER"]
+    with zipfile.ZipFile(destination, mode='w') as zip_file:
+        for attachment in attachments:
+            try:
+                filename = os.path.join(root_dir, attachment.path)
+                zip_file.write(filename, filename[filename.rfind("/") + 1:])
+            except Exception:
+                pass
+            
+        zip_file.write(html_file, html_file_name)

@@ -111,6 +111,8 @@ class Logbook(Model):
         return Entry.select().where(Entry.logbook_id == self.id)
         # return Entry.raw("select * from entry where logbook_id = " + str(self.id) + " order by last_changed_at desc")
 
+    def get_all_attachments(self):
+        return Attachment.raw("select * from attachment inner join entry on entry.id = attachment.entry_id where entry.logbook_id = " + str(self.id))
     @property
     def ancestors(self):
         "The list of parent, grandparent, ..."
@@ -432,6 +434,9 @@ class Entry(Model):
     @property
     def followups(self):
         return Entry.select().where((Entry.follows_id == self.id))
+
+    def get_attachments(self):
+        return Attachment.raw("select * from attachment where attachment.entry_id = " + str(self.id))
 
     @property
     def _thread(self):

@@ -38,7 +38,7 @@ class Logbook extends React.Component {
   }
   //download logbook as html
   download() {
-    const url = `/api/download/?logbook_id=${this.state.logbook.id}`;
+    const url = `/api/download/?logbook_id=${this.state.logbook.id}&include_attachments=true`;
     this.setState({downloading: true});
     fetch(url, {
       method: "GET",
@@ -60,7 +60,7 @@ class Logbook extends React.Component {
         var link = document.createElement("a");
         link.href = data;
         link.setAttribute("type", "hidden");
-        link.download = "elogy_logbook_" + this.state.logbook.id + ".html";
+        link.download = "elogy_logbook_" + this.state.logbook.id + ".zip";
         document.body.appendChild(link);
         link.click();
         setTimeout(function() {
@@ -313,7 +313,7 @@ class Logbook extends React.Component {
                 </Link>{" "}
                 <button
                   className="link-button"
-                  title={`Download the logbook '${logbook.name}' as html`}
+                  title={`Download the logbook '${logbook.name}' and all its attachments`}
                   onClick={this.download}
                 >
                   Download

@@ -40,18 +40,18 @@ class EntryDownloadResource(Resource):
 
     "Handle request for an entry download"
     
-    @use_args({"entry_id": Integer(allow_none=True), "logbook_id": Integer(allow_none=True)})
+    @use_args({"entry_id": Integer(allow_none=True), "logbook_id": Integer(allow_none=True), "include_attachments": Boolean(missing=False)})
     def get(self, args):
         html  = ""
         if "entry_id" in args:
             try:
-                html = export_entry_as_html(args["entry_id"])
+                html = export_entry_as_html(args["entry_id"], args["include_attachments"])
             except Exception:
                 abort(500, message=(
                 "The entry could not be exported"))
         if "logbook_id" in args:
             try:
-                html = export_logbook_as_html(args["logbook_id"])
+                html = export_logbook_as_html(args["logbook_id"], args["include_attachments"])
             except Exception:
                 abort(500, message=(
                 "The logbook could not be exported"))
