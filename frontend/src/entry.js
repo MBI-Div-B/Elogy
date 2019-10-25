@@ -32,7 +32,7 @@ export class InnerEntry extends React.Component {
 
   download() {
     this.setState({ downloading: true });
-    const url = `/api/download/?entry_id=${this.props.id}`;
+    const url = `/api/download/?entry_id=${this.props.id}&include_attachments=true`;
     fetch(url, {
       method: "GET",
       headers: { Accept: "application/pdf" }
@@ -54,7 +54,7 @@ export class InnerEntry extends React.Component {
         const data = window.URL.createObjectURL(newBlob);
         var link = document.createElement("a");
         link.href = data;
-        link.download = "elogy_entry_" + this.props.id + ".html";
+        link.download = "elogy_entry_" + this.props.id + ".zip";
         link.click();
         setTimeout(function() {
           // For Firefox it is necessary to delay revoking the ObjectURL
@@ -188,7 +188,7 @@ export class InnerEntry extends React.Component {
             <div className="commands">
               <button
                 className="link-button"
-                title={`Download this entry as a html file`}
+                title={`Download this entry and all its attachments`}
                 onClick={() => this.download(logbook.id)}
               >
                 Download
