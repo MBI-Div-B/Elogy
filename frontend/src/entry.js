@@ -4,7 +4,7 @@ import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import Mark from "mark.js";
-import {bottomLabel} from "./widgets.js";
+import {notification} from "./widgets.js";
 import "./entry.css";
 import { formatDateTimeString } from "./util.js";
 import { parseQuery } from "./util.js";
@@ -174,7 +174,7 @@ export class InnerEntry extends React.Component {
     ) : null;
     return (
       <div>
-        {downloading && bottomLabel("Downloading entry, please wait...")}
+        {downloading && notification("Downloading entry, please wait...")}
         <article ref="article">
           <div
             className={

@@ -24,6 +24,7 @@ import { withProps, debounce } from "./util.js";
 import { InnerEntry } from "./entry.js";
 import { LogbookSelector } from "./logbookselector.js";
 import "./entryeditor.css";
+import {notification} from "./widgets"
 
 class EntryAttributeEditor extends React.Component {
     /* editor for a single attribute */
@@ -321,7 +322,6 @@ class EntryEditorBase extends React.Component {
             <input
                 type="text"
                 className="title"
-                focus={true}
                 placeholder="Title for the new entry..."
                 ref="title"
                 value={title || ""}
@@ -524,16 +524,18 @@ class EntryEditorBase extends React.Component {
         }
     }
     getError() {
-        // TODO: some nicer formatting of the errors, this is terrible...
-        if (this.state.error) {
-            return (
-                <span className="error">
-                    Error: {JSON.stringify(this.state.error.messages)}
-                </span>
-            );
-        } else {
+        if (!this.state.error){
             return null;
         }
+        const { message, messages } = this.state.error;
+        const error = message ? message : (
+            Object.keys(messages).map(key => key + ": " + messages[key]).reduce((acc, cur) => acc + " " + cur)
+        )
+        return (
+            <span className="error">
+                {error}
+            </span>
+        );
     }
 
     checkRequiredAttributes() {
@@ -793,25 +795,25 @@ class EntryEditorFollowup extends EntryEditorBase {
                 })
             }
         )
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            response.json().then(
+                error => {
+                    this.setState({ error });
+                },
+                error => {
+                    this.setState({
+                        error: {
+                            message: response.statusText,
+                            code: response.status
+                        }
+                    });
                 }
-                response.json().then(
-                    error => {
-                        this.setState({ error: error });
-                    },
-                    error => {
-                        this.setState({
-                            error: {
-                                message: response.statusText,
-                                code: response.status
-                            }
-                        });
-                    }
-                );
-                throw new Error("submit failed");
-            })
+            );
+            throw new Error("submit failed");
+        })
             .then(
                 response => {
                     const entryId = response.entry.id;
@@ -832,7 +834,7 @@ class EntryEditorFollowup extends EntryEditorBase {
                     });
                 },
                 error => {
-                    console.log(error);
+                    this.setState({ error })
                 }
             );
     }
@@ -971,10 +973,7 @@ class EntryEditorEdit extends EntryEditorBase {
         this.setState({ logbookId });
     }
 
-    onSubmit({ history }) {
-        /* TODO: here we might do some checking of the input; e.g.
-           verify that any required attributes are filled in etc. */
-
+    onSave() {
         this.submitted = true;
         // we're creating a new entry
         fetch(
@@ -1002,23 +1001,62 @@ class EntryEditorEdit extends EntryEditorBase {
         )
             .then(response => {
                 if (response.ok) {
-                    return response.json();
+                    this.setState({notification: "Entry saved", entry: {...this.state.entry, revision_n: (this.state.entry. revision_n+1)}})
+                    setTimeout(() => this.setState({notification: ""}), 2000)
+                }else{
+                    response.json().then(
+                        error => {
+                            this.setState({ error: error });
+                        }
+                    );
                 }
-                response.json().then(
-                    error => {
-                        this.setState({ error: error });
-                    },
-                    error => {
-                        this.setState({
-                            error: {
-                                message: response.statusText,
-                                code: response.status
-                            }
-                        });
-                    }
-                );
-                throw new Error("submit failed");
             })
+    }
+    onSubmit({ history }) {
+        this.submitted = true;
+        // we're creating a new entry
+        fetch(
+            `/api/logbooks/${this.state.logbook.id}/entries/${this.state.entry
+                .id}/`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    logbook_id: this.state.logbookId || this.state.logbook.id,
+                    title: this.state.title,
+                    authors: this.state.authors,
+                    content: this.state.content,
+                    content_type: this.state.content_type,
+                    attributes: this.state.attributes,
+                    metadata: this.state.metadata,
+                    follows_id: this.state.follows,
+                    archived: this.state.archived,
+                    revision_n: this.state.entry.revision_n, // must be included for edits!
+                    priority: this.state.priority
+                })
+            }
+        )
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            response.json().then(
+                error => {
+                    this.setState({ error: error });
+                },
+                error => {
+                    this.setState({
+                        error: {
+                            message: response.statusText,
+                            code: response.status
+                        }
+                    });
+                }
+            );
+            throw new Error("submit failed");
+        })
             .then(
                 response => {
                     const entryId = response.entry.id;
@@ -1128,6 +1166,7 @@ class EntryEditorEdit extends EntryEditorBase {
 
         return (
             <div id="entryeditor">
+                {this.state.notification && notification(this.state.notification)}
                 <Prompt message={this.getPromptMessage.bind(this)} />
 
                 <table className="editor">
@@ -1186,6 +1225,13 @@ class EntryEditorEdit extends EntryEditorBase {
                             {this.getLockInfo()}
 
                             <div className="commands">
+                            <button
+                                    className="submit"
+                                    title="Save the entry"
+                                    onClick={this.onSave.bind(this, history)}
+                                >
+                                    Save
+                                </button>
                                 {this.getSubmitButton(history)}
                                 {this.getCancelButton()}
                             </div>

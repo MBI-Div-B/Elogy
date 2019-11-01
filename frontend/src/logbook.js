@@ -4,7 +4,7 @@ import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import update from "immutability-helper";
-import {bottomLabel} from "./widgets"
+import {notification} from "./widgets"
 import { parseQuery } from "./util.js";
 import EntryPreviews from "./entrypreviews.js";
 import "./logbook.css";
@@ -269,7 +269,7 @@ class Logbook extends React.Component {
       <div
         className={"container " + (entryId !== null ? "entry-selected" : "")}
       >
-          {downloading && bottomLabel("Downloading logbook, please wait...")}
+          {downloading && notification("Downloading logbook, please wait...")}
         <button
           className="mobile-back-button"
           onClick={() => this.props.history.push("/")}
