@@ -37,6 +37,7 @@ class LogbookAttributeEditor extends React.PureComponent {
       <div className="attribute">
         <label>
           <input
+            className="form-control form-control-sm"
             type="text"
             ref="name"
             value={this.props.name}
@@ -44,22 +45,22 @@ class LogbookAttributeEditor extends React.PureComponent {
             onChange={this.onChangeName.bind(this)}
           />
         </label>
-        <label>
-          Type:
-          <select
-            name="type"
-            ref="type"
-            value={this.props.type}
-            disabled={this.props.existingAttribute}
-            onChange={this.onChangeType.bind(this)}
-          >
-            <option value="text">Text</option>
-            <option value="number">Number</option>
-            <option value="boolean">Boolean</option>
-            <option value="option">Option</option>
-            <option value="multioption">Multioption</option>
-          </select>
-        </label>
+        Type:
+        <select
+          className="form-control form-control-sm inline-block"
+          style={{ width: "10em" }}
+          name="type"
+          ref="type"
+          value={this.props.type}
+          disabled={this.props.existingAttribute}
+          onChange={this.onChangeType.bind(this)}
+        >
+          <option value="text">Text</option>
+          <option value="number">Number</option>
+          <option value="boolean">Boolean</option>
+          <option value="option">Option</option>
+          <option value="multioption">Multioption</option>
+        </select>
         <label>
           <input
             type="checkbox"
@@ -122,19 +123,32 @@ class LogbookEditorBase extends React.Component {
       return (
         <div className="attribute-panel">
           <div className="button-row">
-            <button type="button" onClick={this.removeAttribute.bind(this, i)}>
+            <button
+              type="button"
+              className="btn btn-danger btn-sm mr-1"
+              onClick={this.removeAttribute.bind(this, i)}
+            >
               <i className="fa fa-trash" />
             </button>
-            <button type="button" onClick={this.insertAttribute.bind(this, i)}>
+            <button
+              type="button"
+              className="btn btn-success btn-sm mr-1"
+              onClick={this.insertAttribute.bind(this, i)}
+            >
               <i className="fa fa-plus" />
             </button>
             <button
+              className="btn btn-secondary btn-sm mr-1"
               type="button"
               onClick={this.moveAttribute.bind(this, i, -1)}
             >
               <i className="fa fa-arrow-up" />
             </button>
-            <button type="button" onClick={this.moveAttribute.bind(this, i, 1)}>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={this.moveAttribute.bind(this, i, 1)}
+            >
               <i className="fa fa-arrow-down" />
             </button>
           </div>
@@ -358,24 +372,32 @@ class LogbookEditorNew extends LogbookEditorBase {
               onChange={this.onTemplateChange.bind(this)}
             />
           </div>
-          <div className="editor-subtitle">Attributes</div>
-          <div className="attributes">{this.getAttributes()}</div>
-          <button
+          <div className="editor-subtitle">
+            Attributes
+            {/* <button
             type="button"
+            className="btn btn-success btn-sm ml-4"
             onClick={this.insertAttribute.bind(
               this,
               this.state.attributes.length
             )}
           >
-            New
-          </button>
+            Add attribute
+          </button> */}
+          </div>
+          <div className="attributes">{this.getAttributes()}</div>
         </form>
 
         {this.getErrors()}
 
-        <footer>
-          <button onClick={this.onSubmit.bind(this, history)}>Submit</button>
-        </footer>
+        <div style={{ height: "3em" }}>
+          <button
+            className="btn btn-primary float-right mr-1"
+            onClick={this.onSubmit.bind(this, history)}
+          >
+            Submit
+          </button>
+        </div>
       </div>
     );
   }
