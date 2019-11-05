@@ -4,7 +4,7 @@ import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import Mark from "mark.js";
-import {notification} from "./widgets.js";
+import { notification } from "./widgets.js";
 import "./entry.css";
 import { formatDateTimeString } from "./util.js";
 import { parseQuery } from "./util.js";
@@ -18,7 +18,7 @@ export class InnerEntry extends React.Component {
   constructor() {
     super();
     this.download = this.download.bind(this);
-    this.state = {downloading: false}
+    this.state = { downloading: false };
   }
   componentDidMount() {
     this.highlightContentFilter();
@@ -79,7 +79,7 @@ export class InnerEntry extends React.Component {
   }
 
   render() {
-    const {downloading} = this.state;
+    const { downloading } = this.state;
     const logbook = this.props.logbook;
     const followups = this.props.followups
       ? this.props.followups.map((followup, i) => (
@@ -152,25 +152,18 @@ export class InnerEntry extends React.Component {
         <div className="content plain">{this.props.content}</div>
       );
 
-    const link = !this.props.hideLink ? (
-      <Link
-        to={`/logbooks/${logbook.id}/entries/${this.props.id}`}
-        title="A direct link to this entry"
-      >
-        Link
-      </Link>
-    ) : null;
-
     const editLink = !this.props.hideEditLink ? (
-      <Link
-        to={{
-          pathname: `/logbooks/${logbook.id}/entries/${this.props.id}/edit`,
-          search: window.location.search
-        }}
-        title="Make changes to this entry"
-      >
-        {lock} Edit
-      </Link>
+      <button type="button" className="btn btn-link">
+        <Link
+          to={{
+            pathname: `/logbooks/${logbook.id}/entries/${this.props.id}/edit`,
+            search: window.location.search
+          }}
+          title="Make changes to this entry"
+        >
+          {lock} Edit
+        </Link>
+      </button>
     ) : null;
     return (
       <div>
@@ -183,11 +176,10 @@ export class InnerEntry extends React.Component {
             }
           >
             <div className="commands">
-              {link} {editLink}
-            </div>
-            <div className="commands">
+              {editLink}
               <button
-                className="link-button"
+                type="button"
+                className="btn btn-link"
                 title={`Download this entry and all its attachments`}
                 onClick={() => this.download(logbook.id)}
               >
@@ -285,26 +277,32 @@ class Entry extends React.Component {
           {this.state.logbook ? (
             <span className="commands">
               {this.state.follows ? (
+                <button type="button" className="btn btn-link">
+                  <Link
+                    to={{
+                      pathname: `/logbooks/${logbook.id}/entries/${this.state.follows}`,
+                      search: window.location.search
+                    }}
+                    title="Go to the entry this one is a followup to"
+                  >
+                    Parent
+                  </Link>
+                </button>
+              ) : null}
+              <button type="button" className="btn btn-link">
                 <Link
                   to={{
-                    pathname: `/logbooks/${logbook.id}/entries/${this.state.follows}`,
+                    pathname: `/logbooks/${logbook.id}/entries/${this.state.id}/new`,
                     search: window.location.search
                   }}
-                  title="Go to the entry this one is a followup to"
+                  title="Create a new entry that follows this one."
                 >
-                  Parent
+                  <i className="fa fa-comment" /> New Follow-up
                 </Link>
-              ) : null}
-              <Link
-                to={{
-                  pathname: `/logbooks/${logbook.id}/entries/${this.state.id}/new`,
-                  search: window.location.search
-                }}
-                title="Create a new entry that follows this one."
-              >
-                <i className="fa fa-comment" /> New Follow-up
-              </Link>
-              &nbsp;|&nbsp;
+              </button>
+              <button
+      type="button" className="btn btn-link"
+      >
               <Link
                 to={{
                   pathname: `/logbooks/${logbook.id}/entries/new`,
@@ -314,6 +312,7 @@ class Entry extends React.Component {
               >
                 New Entry
               </Link>
+              </button>
             </span>
           ) : null}
 

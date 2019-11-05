@@ -1,10 +1,10 @@
 /* Displays a logbook and the entries in it, after optional filtering */
 
-import React from "react";
+import React, { Fragment } from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import update from "immutability-helper";
-import {notification} from "./widgets"
+import { notification } from "./widgets";
 import { parseQuery } from "./util.js";
 import EntryPreviews from "./entrypreviews.js";
 import "./logbook.css";
@@ -39,7 +39,7 @@ class Logbook extends React.Component {
   //download logbook as html
   download() {
     const url = `/api/download/?logbook_id=${this.state.logbook.id}&include_attachments=true`;
-    this.setState({downloading: true});
+    this.setState({ downloading: true });
     fetch(url, {
       method: "GET",
       headers: { Accept: "application/pdf" }
@@ -68,7 +68,7 @@ class Logbook extends React.Component {
           window.URL.revokeObjectURL(data);
           link.remove();
         }, 1000);
-        this.setState({downloading: false})
+        this.setState({ downloading: false });
       });
   }
 
@@ -228,7 +228,7 @@ class Logbook extends React.Component {
   }
 
   render() {
-    const {logbook, downloading} = this.state,
+    const { logbook, downloading } = this.state,
       entryId = this.props.match.params.entryId
         ? parseInt(this.props.match.params.entryId, 10)
         : null,
@@ -247,6 +247,8 @@ class Logbook extends React.Component {
             )
             .map(attr => (
               <select
+                className="form-control form-control-xs"
+                style={{ display: "inline-block", width: "32%" }}
                 key={attr.name}
                 onChange={this.onChangeAttributeFilter.bind(this, attr.name)}
               >
@@ -269,7 +271,7 @@ class Logbook extends React.Component {
       <div
         className={"container " + (entryId !== null ? "entry-selected" : "")}
       >
-          {downloading && notification("Downloading logbook, please wait...")}
+        {downloading && notification("Downloading logbook, please wait...")}
         <button
           className="mobile-back-button"
           onClick={() => this.props.history.push("/")}
@@ -292,60 +294,67 @@ class Logbook extends React.Component {
             {logbook.id ? (
               <span>
                 <div className="entry">
+                  <button type="button" className="btn btn-link">
+                    <Link
+                      to={{
+                        pathname: `/logbooks/${logbook.id}/entries/new`,
+                        search: window.location.search
+                      }}
+                      title={`Create a new entry in the logbook '${logbook.name}'`}
+                    >
+                      New entry
+                    </Link>
+                  </button>
+                </div>
+                <button type="button" className="btn btn-link">
                   <Link
                     to={{
-                      pathname: `/logbooks/${logbook.id}/entries/new`,
+                      pathname: `/logbooks/${logbook.id}/edit`,
                       search: window.location.search
                     }}
-                    title={`Create a new entry in the logbook '${logbook.name}'`}
+                    title={`Edit the settings of the logbook '${logbook.name}'`}
                   >
-                    New entry
+                    Configure
                   </Link>
-                </div>
-                <Link
-                  to={{
-                    pathname: `/logbooks/${logbook.id}/edit`,
-                    search: window.location.search
-                  }}
-                  title={`Edit the settings of the logbook '${logbook.name}'`}
-                >
-                  Configure
-                </Link>{" "}
+                </button>
                 <button
-                  className="link-button"
+                  type="button"
+                  className="btn btn-link"
                   title={`Download the logbook '${logbook.name}' and all its attachments`}
                   onClick={this.download}
                 >
                   Download
                 </button>
-                |&nbsp;
               </span>
             ) : null}
-            <Link
-              to={{
-                pathname: `/logbooks/${logbook.id}/new`,
-                search: window.location.search
-              }}
-              title={
-                logbook.id === 0
-                  ? "Create a new top level logbook"
-                  : `Create a new logbook as a child of '${logbook.name}'`
-              }
-            >
-              New logbook
-            </Link>
+            <button type="button" className="btn btn-link">
+              <Link
+                to={{
+                  pathname: `/logbooks/${logbook.id}/new`,
+                  search: window.location.search
+                }}
+                title={
+                  logbook.id === 0
+                    ? "Create a new top level logbook"
+                    : `Create a new logbook as a child of '${logbook.name}'`
+                }
+              >
+                New logbook
+              </Link>
+            </button>
           </div>
           <div className="filters"> {filter} </div>
           <div className="attributes">{attributes}</div>
           {this.state.entries.length === 0 ? null : (
-            <div className="date-sorting">
-              Sort by:{" "}
+            <div className="mt-1">
               <select
+                className="form-control form-control-xs"
+                style={{ width: "32%" }}
                 value={this.state.sortBy}
                 onChange={e => this.onSetSortBy(e.target.value)}
               >
-                <option value="created">Date created</option>
-                <option value="modified">Last modified</option>
+                <option value="created">Sort by date created</option>
+                <option value="modified">Sorty by last modified</option>
               </select>
             </div>
           )}
