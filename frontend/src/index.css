@@ -12,8 +12,7 @@ html, body {
 
 /* Overwritten bootstrap css */
 .btn-link{
-    padding-left: 0.2em;
-    padding-right: 0.2em;
+    padding: 0em 0.2em;
 }
 
 .form-control-xs {

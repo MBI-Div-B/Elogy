@@ -73,7 +73,6 @@
 }
 
 #logbook dd.entry {
-    opacity: 0.5;    
     list-style: none;
     padding: 5px 5px 0 5px;
     height: 5em;
@@ -119,16 +118,14 @@
     font-size: 90%;
 }
 
-#logbook .entry .authors {
-
-}
-
 #logbook .entry .authors .author:not(:last-child):after {
     content: ", ";
 }
 
 #logbook .entry .author {
     white-space: nowrap;
+    font-style: italic;
+    font-size: 0.8em;
 }
 
 #logbook .entry .timestamp {
@@ -141,14 +138,11 @@
     overflow-x: hidden;
 }
 
-#logbook .entry .title > span {
-    text-decoration: underline;
-}
-
 #logbook .entry .content {
     font-size: 80%;
     white-space: normal;
     height: 100%;
+    opacity: 0.5;
 }
 
 #logbook .entry img {
@@ -213,7 +207,7 @@
     top: 0;
     position: sticky;    
     color: #375f79;
-    background: #dee0e2;
+    background: #ced7e0;
     text-align: center;
     z-index: 1;
     font-weight: 800;
