@@ -294,8 +294,9 @@ class Logbook extends React.Component {
             {logbook.id ? (
               <span>
                 <div className="entry">
-                  <button type="button" className="btn btn-link">
                     <Link
+                    className="btn btn-link"
+                    role="button"
                       to={{
                         pathname: `/logbooks/${logbook.id}/entries/new`,
                         search: window.location.search
@@ -304,19 +305,18 @@ class Logbook extends React.Component {
                     >
                       New entry
                     </Link>
-                  </button>
                 </div>
-                <button type="button" className="btn btn-link">
-                  <Link
-                    to={{
-                      pathname: `/logbooks/${logbook.id}/edit`,
-                      search: window.location.search
-                    }}
-                    title={`Edit the settings of the logbook '${logbook.name}'`}
-                  >
-                    Configure
-                  </Link>
-                </button>
+                <Link
+                  className="btn btn-link"
+                  role="button"
+                  to={{
+                    pathname: `/logbooks/${logbook.id}/edit`,
+                    search: window.location.search
+                  }}
+                  title={`Edit the settings of the logbook '${logbook.name}'`}
+                >
+                  Configure
+                </Link>
                 <button
                   type="button"
                   className="btn btn-link"
@@ -327,21 +327,21 @@ class Logbook extends React.Component {
                 </button>
               </span>
             ) : null}
-            <button type="button" className="btn btn-link">
-              <Link
-                to={{
-                  pathname: `/logbooks/${logbook.id}/new`,
-                  search: window.location.search
-                }}
-                title={
-                  logbook.id === 0
-                    ? "Create a new top level logbook"
-                    : `Create a new logbook as a child of '${logbook.name}'`
-                }
-              >
-                New logbook
-              </Link>
-            </button>
+            <Link
+              className="btn btn-link"
+              role="button"
+              to={{
+                pathname: `/logbooks/${logbook.id}/new`,
+                search: window.location.search
+              }}
+              title={
+                logbook.id === 0
+                  ? "Create a new top level logbook"
+                  : `Create a new logbook as a child of '${logbook.name}'`
+              }
+            >
+              New logbook
+            </Link>
           </div>
           <div className="filters"> {filter} </div>
           <div className="attributes">{attributes}</div>
