@@ -71,7 +71,7 @@ export class LogbookSelector extends React.Component {
         <LogbookOption
           key={logbook.id}
           logbook={logbook}
-          current={logbook.id === this.props.logbookId}
+          current={logbook.id === this.props.currentParentId}
           ancestors={ancestors}
         />
       ));
@@ -79,7 +79,7 @@ export class LogbookSelector extends React.Component {
     return (
       <select
         style={{ display: "inline-block" }}
-        value={this.props.logbookId}
+        value={this.props.currentParentId}
         className="form-control form-control-sm"
         title="Current logbook"
         onChange={this.onChange.bind(this)}
