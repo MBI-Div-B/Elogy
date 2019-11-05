@@ -160,15 +160,15 @@
 }
 
 
-#entryeditor .commands button {
+/* #entryeditor .commands button {
     font-size: 100%;
     border: 0;
     border-radius: 3px;
     margin: 2px;
     padding: 5px 10px;
-}    
+}     */
 
-#entryeditor button.submit {
+/* #entryeditor button.submit {
     background: green;
     color: white;
 }
@@ -181,7 +181,7 @@
 #entryeditor button.cancel {
     background: red;
     color: white;
-}
+} */
 
 #entryeditor .attachments {
     max-height: 180px;

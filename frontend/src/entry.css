@@ -20,6 +20,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding: 0;
 }
 
 #entry .container header {
@@ -95,15 +96,15 @@
 
 #entry .info .attributes .attribute .name {
     background: #ccc;
-    color: black;
-    padding: 1px 4px;
+    color: #333;
+    padding: 3px 6px;
     border-radius: 5px 0 0 5px;
 }
 
 #entry .info .attributes .attribute .value {
-    background: #666;
+    background: #375f79;
     color: white;
-    padding: 1px 4px;
+    padding: 3px 6px;
     border-radius: 0 5px 5px 0;
 }
 
