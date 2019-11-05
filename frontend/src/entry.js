@@ -153,17 +153,17 @@ export class InnerEntry extends React.Component {
       );
 
     const editLink = !this.props.hideEditLink ? (
-      <button type="button" className="btn btn-link">
-        <Link
-          to={{
-            pathname: `/logbooks/${logbook.id}/entries/${this.props.id}/edit`,
-            search: window.location.search
-          }}
-          title="Make changes to this entry"
-        >
-          {lock} Edit
-        </Link>
-      </button>
+      <Link
+        className="btn btn-link"
+        role="button"
+        to={{
+          pathname: `/logbooks/${logbook.id}/entries/${this.props.id}/edit`,
+          search: window.location.search
+        }}
+        title="Make changes to this entry"
+      >
+        {lock} Edit
+      </Link>
     ) : null;
     return (
       <div>
@@ -277,33 +277,32 @@ class Entry extends React.Component {
           {this.state.logbook ? (
             <span className="commands">
               {this.state.follows ? (
-                <button type="button" className="btn btn-link">
-                  <Link
-                    to={{
-                      pathname: `/logbooks/${logbook.id}/entries/${this.state.follows}`,
-                      search: window.location.search
-                    }}
-                    title="Go to the entry this one is a followup to"
-                  >
-                    Parent
-                  </Link>
-                </button>
-              ) : null}
-              <button type="button" className="btn btn-link">
                 <Link
+                  className="btn btn-link"
+                  role="button"
                   to={{
-                    pathname: `/logbooks/${logbook.id}/entries/${this.state.id}/new`,
+                    pathname: `/logbooks/${logbook.id}/entries/${this.state.follows}`,
                     search: window.location.search
                   }}
-                  title="Create a new entry that follows this one."
+                  title="Go to the entry this one is a followup to"
                 >
-                  <i className="fa fa-comment" /> New Follow-up
+                  Parent
                 </Link>
-              </button>
-              <button
-      type="button" className="btn btn-link"
-      >
+              ) : null}
               <Link
+                className="btn btn-link"
+                role="button"
+                to={{
+                  pathname: `/logbooks/${logbook.id}/entries/${this.state.id}/new`,
+                  search: window.location.search
+                }}
+                title="Create a new entry that follows this one."
+              >
+                <i className="fa fa-comment" /> New Follow-up
+              </Link>
+              <Link
+                className="btn btn-link"
+                role="button"
                 to={{
                   pathname: `/logbooks/${logbook.id}/entries/new`,
                   search: window.location.search
@@ -312,7 +311,6 @@ class Entry extends React.Component {
               >
                 New Entry
               </Link>
-              </button>
             </span>
           ) : null}
 

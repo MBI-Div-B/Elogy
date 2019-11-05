@@ -78,7 +78,7 @@ export class LogbookSelector extends React.Component {
 
     return (
       <select
-      style={{display: "inline-block"}}
+        style={{ display: "inline-block" }}
         value={this.props.logbookId}
         className="form-control form-control-sm"
         title="Current logbook"
