@@ -352,6 +352,7 @@ class LogbookEditorNew extends LogbookEditorBase {
         <form>
           <div className="editor-subtitle">Name</div>
           <input
+            className="form-control form-control-sm"
             type="text"
             name="name"
             value={this.state.name}
@@ -359,6 +360,7 @@ class LogbookEditorNew extends LogbookEditorBase {
           />
           <div className="editor-subtitle">Description</div>
           <textarea
+            className="form-control form-control-sm"
             name="description"
             rows={5}
             value={this.state.description}
@@ -499,7 +501,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
         <Prompt message={this.getPromptMessage.bind(this)} />
 
         <header>
-          Editing logbook "{this.state.logbook.name}" in
+          Editing logbook "{this.state.logbook.name}" in {" "}
           <LogbookSelector
             currentParentId={parentId}
             currentId={this.state.id}
@@ -511,6 +513,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
         <form>
           <div className="editor-subtitle">Name</div>
           <input
+            className="form-control form-control-sm"
             type="text"
             name="name"
             value={this.state.name}
@@ -518,6 +521,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
           />
           <div className="editor-subtitle">Description</div>
           <textarea
+            className="form-control form-control-sm"
             name="description"
             rows={5}
             value={this.state.description}
@@ -533,7 +537,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
           </div>
           <div className="editor-subtitle">Attributes</div>
           <div className="attributes">{this.getAttributes()}</div>
-          <button
+          {/* <button
             type="button"
             onClick={this.insertAttribute.bind(
               this,
@@ -541,7 +545,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
             )}
           >
             New
-          </button>
+          </button> */}
         </form>
 
         {this.getErrors()}
@@ -555,13 +559,15 @@ class LogbookEditorEdit extends LogbookEditorBase {
             />
             Archived
           </label>
-
-          <button
-            onClick={this.onSubmit.bind(this, history)}
-            disabled={!this.canSubmit()}
-          >
-            Submit
-          </button>
+          <div style={{ height: "3em" }}>
+            <button
+              className="btn btn-primary float-right mr-1"
+              onClick={this.onSubmit.bind(this, history)}
+              disabled={!this.canSubmit()}
+            >
+              Submit
+            </button>
+          </div>
         </footer>
       </div>
     );

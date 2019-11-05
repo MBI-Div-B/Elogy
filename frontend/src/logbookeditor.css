@@ -1,6 +1,5 @@
 #logbookeditor {
-    background: #ddd;
-    padding: 5px;
+    padding: 0.5em 1em;
 }
 
 #logbookeditor header select {

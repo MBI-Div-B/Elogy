@@ -1,5 +1,5 @@
 #entry {
-    background: #ccc;
+    background: #ddd;
 }
 
 #entry .empty {
@@ -10,10 +10,6 @@
 
 #entry img {
     image-orientation: from-image;
-}
-
-#entry header {
-
 }
 
 #entry .container {
