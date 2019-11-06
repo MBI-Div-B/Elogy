@@ -235,15 +235,16 @@
     margin-bottom: 0.2em;
 }
 
-#logbook .filters {
-}
 
 #logbook .filter {
     display: inline-block;  /* prevent line breaks */
     margin: 3px;
     padding: 2px 5px;
-    background: #999;
-    color: white;
+    background: #e7f0f1;
+    color: #026a7b;
+    border-radius: 4px;
+    border: 1px solid #dae7e8;
+    font-size: 0.8em;
 }
 
 #logbook .filter .delete {
