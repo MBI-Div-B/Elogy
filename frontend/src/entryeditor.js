@@ -22,7 +22,7 @@ import { EntryAttachments } from "./entryattachments.js";
 import TINYMCE_CONFIG from "./tinymceconfig.js";
 import { withProps, debounce } from "./util.js";
 import { InnerEntry } from "./entry.js";
-import { LogbookSelector } from "./logbookselector.js";
+import { MoveEntryWidget } from "./moveWidgets.js";
 import "./entryeditor.css";
 import { notification } from "./widgets";
 
@@ -93,6 +93,7 @@ class EntryAttributeEditor extends React.Component {
       case "text":
         return (
           <input
+            className="form-control form-control-sm"
             type="text"
             value={this.state.value}
             name={config.name}
@@ -107,6 +108,7 @@ class EntryAttributeEditor extends React.Component {
       case "number":
         return (
           <input
+          className="form-control form-control-sm"
             type="number"
             step="any"
             inputmode="numeric"
@@ -172,7 +174,7 @@ class EntryAttributeEditor extends React.Component {
   render() {
     const className = `attribute-wrapper ${this.props.config.type}-attribute`;
     return (
-      <div className={className} title={this.props.config.name}>
+      <div className={className} style={{verticalAlign: "top"}} title={this.props.config.name}>
         {this.makeInputElement()}
       </div>
     );
@@ -1176,12 +1178,8 @@ class EntryEditorEdit extends EntryEditorBase {
               {this.state.follows ? (
                 this.state.logbook.name
               ) : (
-                <LogbookSelector
-                  currentId={this.state.logbookId || this.state.logbook.id}
-                  currentName={this.state.logbook.name}
-                  currentParentId={
-                    this.state.logbook.parent ? this.state.logbook.parent.id : 0
-                  }
+                <MoveEntryWidget
+                  selectedLogbook={this.state.logbookId || this.state.logbook.id}
                   onLogbookChange={this.onLogbookChange.bind(this)}
                 />
               )}

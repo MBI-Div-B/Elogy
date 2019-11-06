@@ -5,7 +5,7 @@ import TinyMCEInput from "./TinyMCEInput.js";
 
 import TINYMCE_CONFIG from "./tinymceconfig.js";
 import { withProps } from "./util.js";
-import { LogbookSelector } from "./logbookselector.js";
+import { MoveLogbookWidget } from "./moveWidgets.js";
 import "./logbookeditor.css";
 
 // Editor for a single logbook attribute
@@ -506,7 +506,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
 
         <header>
           Editing logbook <b>{this.state.logbook.name}</b> in{" "}
-          <LogbookSelector
+          <MoveLogbookWidget
             currentParentId={parentId}
             currentId={this.state.id}
             currentName={this.state.name}
