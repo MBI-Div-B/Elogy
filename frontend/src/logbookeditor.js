@@ -34,7 +34,7 @@ class LogbookAttributeEditor extends React.PureComponent {
 
   render() {
     return (
-      <div className="attribute">
+      <div className="attribute" style={{display: "inline-block"}}>
         <label>
           <input
             className="form-control form-control-sm"
@@ -130,14 +130,6 @@ class LogbookEditorBase extends React.Component {
               onClick={this.removeAttribute.bind(this, i)}
             >
               <i className="fa fa-trash" />
-            </button>
-            <button
-              title="Add a new attribute"
-              type="button"
-              className="btn btn-success btn-xs mr-1"
-              onClick={this.insertAttribute.bind(this, i)}
-            >
-              <i className="fa fa-plus" />
             </button>
             <button
               title="Move this attribute up in the list"
@@ -380,16 +372,14 @@ class LogbookEditorNew extends LogbookEditorBase {
           </div>
           <div className="editor-subtitle">
             Attributes
-            {/* <button
-            type="button"
-            className="btn btn-success btn-sm ml-4"
-            onClick={this.insertAttribute.bind(
-              this,
-              this.state.attributes.length
-            )}
-          >
-            Add attribute
-          </button> */}
+          <button
+              title="Add a new attribute"
+              type="button"
+              className="btn btn-link"
+              onClick={this.insertAttribute.bind(this, this.state.attributes.length)}
+            >
+              Add
+            </button>
           </div>
           <div className="attributes">{this.getAttributes()}</div>
         </form>
