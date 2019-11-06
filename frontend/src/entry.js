@@ -321,7 +321,7 @@ class Entry extends React.Component {
             }}
           >
             <span className="logbook">
-              <i className="fa fa-book" />{" "}
+              {/* <i className="fa fa-book" />{" "} */}
               {this.state.logbook && this.state.logbook.name}
             </span>
           </Link>
