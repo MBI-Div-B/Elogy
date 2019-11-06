@@ -702,7 +702,7 @@ class EntryEditorNew extends EntryEditorBase {
             <th className="title">
               New entry in{" "}
               <span className="logbook">
-                <i className="fa fa-book" />{" "}
+                {/* <i className="fa fa-book" />{" "} */}
                 {this.state.logbook.name || "[unknown]"}
               </span>
             </th>
@@ -860,7 +860,8 @@ class EntryEditorFollowup extends EntryEditorBase {
               Followup to {this.state.entry.title} in{" "}
               <span className="logbook">
                 {" "}
-                <i className="fa fa-book" /> {this.state.logbook.name || "ehe"}
+                {/* <i className="fa fa-book" />  */}
+                {this.state.logbook.name || "ehe"}
               </span>
             </th>
           </tr>
@@ -1142,7 +1143,7 @@ class EntryEditorEdit extends EntryEditorBase {
         <div>
           Editing followup to [{this.state.follows}] in{" "}
           <span className="logbook">
-            <i className="fa fa-book" />{" "}
+            {/* <i className="fa fa-book" />{" "} */}
             {this.state.logbook.name || "[unknown]"}
           </span>
         </div>
@@ -1152,7 +1153,7 @@ class EntryEditorEdit extends EntryEditorBase {
         <div>
           Editing '{this.state.title}' in{" "}
           <span className="logbook">
-            <i className="fa fa-book" />{" "}
+            {/* <i className="fa fa-book" />{" "} */}
             {this.state.logbook.name || "[unknown]"}
           </span>
         </div>

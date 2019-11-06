@@ -349,8 +349,8 @@ class LogbookEditorNew extends LogbookEditorBase {
 
         <header>
           {this.state.parent.id
-            ? `New logbook in "${this.state.parent.name}"`
-            : "New top level logbook"}
+            ? <div>New logbook in <b>{this.state.parent.name}</b></div>
+            : <div>New top level logbook</div>}
         </header>
 
         <form>

@@ -281,7 +281,7 @@ class Logbook extends React.Component {
         </button>
         <header>
           <span className="name">
-            <i className="fa fa-book" />
+            {/* <i className="fa fa-book" /> */}
             {logbook.id === 0 ? "[All logbooks]" : logbook.name}
           </span>
           <div className="commands">

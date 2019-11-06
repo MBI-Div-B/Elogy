@@ -54,7 +54,7 @@
 }
 
 #logbook .entries .no-entries {
-    padding-top: 20px;
+    padding: 2em;
     text-align: center;
 }
 
