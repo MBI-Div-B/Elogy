@@ -45,7 +45,7 @@ class LogbookAttributeEditor extends React.PureComponent {
             onChange={this.onChangeName.bind(this)}
           />
         </label>
-        Type:
+        Type:{" "}
         <select
           className="form-control form-control-sm inline-block"
           style={{ width: "10em" }}
@@ -124,29 +124,33 @@ class LogbookEditorBase extends React.Component {
         <div className="attribute-panel">
           <div className="button-row">
             <button
+              title="Remove this attribute"
               type="button"
-              className="btn btn-danger btn-sm mr-1"
+              className="btn btn-danger btn-xs mr-1"
               onClick={this.removeAttribute.bind(this, i)}
             >
               <i className="fa fa-trash" />
             </button>
             <button
+              title="Add a new attribute"
               type="button"
-              className="btn btn-success btn-sm mr-1"
+              className="btn btn-success btn-xs mr-1"
               onClick={this.insertAttribute.bind(this, i)}
             >
               <i className="fa fa-plus" />
             </button>
             <button
-              className="btn btn-secondary btn-sm mr-1"
+              title="Move this attribute up in the list"
+              className="btn btn-secondary btn-xs mr-1"
               type="button"
               onClick={this.moveAttribute.bind(this, i, -1)}
             >
               <i className="fa fa-arrow-up" />
             </button>
             <button
+              title="Move this attribute down in the list"
               type="button"
-              className="btn btn-secondary btn-sm"
+              className="btn btn-secondary btn-xs"
               onClick={this.moveAttribute.bind(this, i, 1)}
             >
               <i className="fa fa-arrow-down" />
@@ -392,9 +396,9 @@ class LogbookEditorNew extends LogbookEditorBase {
 
         {this.getErrors()}
 
-        <div style={{ height: "3em" }}>
+        <div>
           <button
-            className="btn btn-primary float-right mr-1"
+            className="btn btn-info float-right mr-1"
             onClick={this.onSubmit.bind(this, history)}
           >
             Submit
@@ -501,7 +505,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
         <Prompt message={this.getPromptMessage.bind(this)} />
 
         <header>
-          Editing logbook "{this.state.logbook.name}" in {" "}
+          Editing logbook <b>{this.state.logbook.name}</b> in{" "}
           <LogbookSelector
             currentParentId={parentId}
             currentId={this.state.id}
@@ -561,7 +565,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
           </label>
           <div style={{ height: "3em" }}>
             <button
-              className="btn btn-primary float-right mr-1"
+              className="btn btn-info float-right mr-1"
               onClick={this.onSubmit.bind(this, history)}
               disabled={!this.canSubmit()}
             >

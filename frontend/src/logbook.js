@@ -248,7 +248,7 @@ class Logbook extends React.Component {
             .map(attr => (
               <select
                 className="form-control form-control-xs"
-                style={{ display: "inline-block", width: "32%" }}
+                style={{ display: "inline-block", width: "30%" }}
                 key={attr.name}
                 onChange={this.onChangeAttributeFilter.bind(this, attr.name)}
               >
@@ -349,7 +349,7 @@ class Logbook extends React.Component {
             <div className="mt-1">
               <select
                 className="form-control form-control-xs"
-                style={{ width: "32%" }}
+                style={{ width: "30%" }}
                 value={this.state.sortBy}
                 onChange={e => this.onSetSortBy(e.target.value)}
               >

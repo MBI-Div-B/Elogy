@@ -424,7 +424,7 @@ class EntryEditorBase extends React.Component {
   getSubmitButton(history) {
     return (
       <button
-        className="btn btn-success btn-sm ml-1"
+        className="btn btn-info btn-sm ml-1"
         title="Upload the entry"
         onClick={this.onSubmit.bind(this, history)}
       >
@@ -1123,7 +1123,7 @@ class EntryEditorEdit extends EntryEditorBase {
     } else {
       return (
         <button
-          className="btn btn-success btn-sm ml-1"
+          className="btn btn-info btn-sm ml-1"
           title="Upload the entry"
           onClick={this.onSubmit.bind(this, history)}
         >
