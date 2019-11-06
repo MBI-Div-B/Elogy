@@ -128,12 +128,12 @@ class QuickSearch extends React.Component {
             </label>
             <div>
             <input
-              className="btn btn-primary btn-sm mr-1"
+              className="btn btn-info btn-sm mr-1"
               type="submit"
               value="Search"
             />
             <button
-              className="btn btn-danger btn-sm ml-1"
+              className="btn btn-secondary btn-sm ml-1"
               onClick={this.onReset.bind(this, history)}
             >
               Clear
