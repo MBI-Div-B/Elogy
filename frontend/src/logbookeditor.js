@@ -529,17 +529,18 @@ class LogbookEditorEdit extends LogbookEditorBase {
               onChange={this.onTemplateChange.bind(this)}
             />
           </div>
-          <div className="editor-subtitle">Attributes</div>
+          <div className="editor-subtitle">
+            Attributes
+          <button
+              title="Add a new attribute"
+              type="button"
+              className="btn btn-link"
+              onClick={this.insertAttribute.bind(this, this.state.attributes.length)}
+            >
+              Add
+            </button>
+            </div>
           <div className="attributes">{this.getAttributes()}</div>
-          {/* <button
-            type="button"
-            onClick={this.insertAttribute.bind(
-              this,
-              this.state.attributes.length
-            )}
-          >
-            New
-          </button> */}
         </form>
 
         {this.getErrors()}
