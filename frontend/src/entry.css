@@ -1,5 +1,4 @@
 #entry {
-    background: #ccc;
 }
 
 #entry .empty {
@@ -12,20 +11,16 @@
     image-orientation: from-image;
 }
 
-#entry header {
-
-}
-
 #entry .container {
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding: 0;
 }
 
 #entry .container header {
     flex: 0;
     padding: 5px 10px;
-    background: #eee;
 }
 
 #entry header .logbook  {
@@ -56,22 +51,19 @@
     /* this is the magic that keeps the entry headers floating along */
     position: sticky;  
     top: 0;
-    background: #eee;
-    border-top: 1px solid #bbb;
-    border-bottom: 1px solid #bbb;
-    padding: 5px 10px;          
+    border-top: 1px solid #e7e7e7;
+    border-bottom: 1px solid #d3e3e4;
+    padding: 5px 10px;
+    background: rgba(231,240,241, 1); 
 }
 
 #entry .commands {
     float: right;
 }
 
-#entry .followups .info {
-    border-top: 1px solid #bbb;
-}
-
 #entry .followups {
-    border-left: 10px solid #ccc;
+    border-left: 5px solid #ddd;
+    margin-left: 1em;
 }
 
 #entry .info .authors span.author:not(:last-child):after {
@@ -94,16 +86,16 @@
 
 
 #entry .info .attributes .attribute .name {
-    background: #ccc;
-    color: black;
-    padding: 1px 4px;
+    color: #333;
+    padding: 3px 6px;
     border-radius: 5px 0 0 5px;
+    background: white;
 }
 
 #entry .info .attributes .attribute .value {
-    background: #666;
+    background: #5785a2;
     color: white;
-    padding: 1px 4px;
+    padding: 3px 6px;
     border-radius: 0 5px 5px 0;
 }
 
@@ -112,7 +104,7 @@
 }
 
 #entry article {
-    border-bottom: 2px solid black;
+    border-bottom: 1px solid #eee;
 }   
 
 #entry article .content {
@@ -166,7 +158,6 @@
 }
 
 #entry article .attachments table tr:nth-child(even) {
-    background: #ccc;
 }
 
 #entry table[width="98%"] {

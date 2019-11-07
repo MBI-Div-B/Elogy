@@ -56,7 +56,7 @@ class EntryDownloadResource(Resource):
                 abort(500, message=(
                 "The logbook could not be exported"))
 
-        return send_file(html, mimetype="application/pdf", as_attachment=True, attachment_filename=(html))
+        return send_file(html, mimetype="application/zip", as_attachment=True, attachment_filename=(html))
 
 
 class EntryResource(Resource):

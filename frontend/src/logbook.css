@@ -1,11 +1,11 @@
 #logbook {
-    background: #ccc;    
 }
 
 #logbook .container {
     display: flex;
     flex-direction: column;
-    height: 100%;     
+    height: 100%;
+    padding: 0;
 }
 
 #logbook .empty {
@@ -17,8 +17,8 @@
 #logbook header {
     padding: 5px;
     position: relative;
-    background: #ddd;
-    border-bottom: 1px solid #aaa;
+    border-bottom: 1px solid #ddd;
+    background: #f7f7f9;
 }
 
 #logbook header .commands {
@@ -36,46 +36,53 @@
 
 #logbook .entries-container {
      flex: 1;
-     background: #ddd;
      max-height: 100%;
-     overflow-y: auto;    
+     overflow-y: auto;
+     background: #f7f7f9;
+
+background: repeating-linear-gradient(
+    45deg,
+    rgba(238, 238, 238, 0.2),
+    rgba(238, 238, 238, 0.2) 5px,
+    rgba(165, 165, 165, 0.15) 5px,
+    rgba(158, 158, 158, 0.15) 10px
+  );
 }
 
 #logbook dl {
     padding: 0;
     margin: 0;
-    background: #ccc;        
         
 }
 
 #logbook .entries {
     position: relative;
+    border-bottom: 1px solid #eee;
+    background: white;
 }
 
 #logbook .entries .no-entries {
-    padding-top: 20px;
+    padding: 2em;
     text-align: center;
 }
 
 #logbook .load-more {
     padding: 5px;
-    border-top: 1px solid #bbb;
-    border-bottom: 1px solid #bbb;
-    background: #eee;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
     text-align: center;
+    background: white;
 }
 
 #logbook dd {
     padding: 0;
     margin: 0;
-    background: #eee;    
 }
 
 #logbook dd.entry {
-    opacity: 0.5;    
     list-style: none;
     padding: 5px 5px 0 5px;
-    height: 5em;
+    height: 6em;
     overflow: hidden;
 }
 
@@ -118,16 +125,14 @@
     font-size: 90%;
 }
 
-#logbook .entry .authors {
-
-}
-
 #logbook .entry .authors .author:not(:last-child):after {
     content: ", ";
 }
 
 #logbook .entry .author {
     white-space: nowrap;
+    font-style: italic;
+    font-size: 0.8em;
 }
 
 #logbook .entry .timestamp {
@@ -140,14 +145,11 @@
     overflow-x: hidden;
 }
 
-#logbook .entry .title > span {
-    text-decoration: underline;
-}
-
 #logbook .entry .content {
     font-size: 80%;
     white-space: normal;
     height: 100%;
+    opacity: 0.8;
 }
 
 #logbook .entry img {
@@ -193,12 +195,12 @@
 }
 
 #logbook dd.entry:not(:last-child) {
-    border-bottom: 1px solid #aaa;
+    border-bottom: 1px solid #ddd;
 }
 
 #logbook dd.entry.selected {
     opacity: 1;
-    background: white;
+    background: #fffff3;
 }
 
 #logbook dl.date-group {
@@ -211,11 +213,13 @@
 #logbook dt.group {
     top: 0;
     position: sticky;    
-    font-size: 80%;
-    color: black;
-    background: #bbb;
+    color: #026a7b;
+    background: #e7f0f1;
     text-align: center;
     z-index: 1;
+    font-weight: 800;
+    font-size: 80%;
+
 }
 
 
@@ -236,19 +240,20 @@
 }
 
 #logbook .attributes select {
-    font-size: 70%;
-    margin: 1px;
+    margin-right:0.5em;
+    margin-bottom: 0.2em;
 }
 
-#logbook .filters {
-}
 
 #logbook .filter {
     display: inline-block;  /* prevent line breaks */
     margin: 3px;
     padding: 2px 5px;
-    background: #999;
-    color: white;
+    background: #e7f0f1;
+    color: #026a7b;
+    border-radius: 4px;
+    border: 1px solid #dae7e8;
+    font-size: 0.8em;
 }
 
 #logbook .filter .delete {
