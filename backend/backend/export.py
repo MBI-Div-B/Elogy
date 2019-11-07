@@ -50,6 +50,7 @@ def get_entry_as_html(entry):
     Exports an elogy entry as a html
     """
     attach_sources = re.findall('src="/attachments([^"]+)"', entry.content)
+    base_url = current_app.config["BASEURL"]
     # attach_sources = re.findall('(src="/attachments([^"]+)")|(src=\'/attachments([^"]+)\')', entry.content)
     new_content = entry.content
     for attach_source in attach_sources:
@@ -62,12 +63,13 @@ def get_entry_as_html(entry):
     #     base64 = get_attachment_base64(attach_source)
     #     new_content = new_content.replace("src='/attachments" + attach_source, "class='inline-image' src='data:image/png;base64, " + base64)
 
-    entry_html = "<div class='meta'><h3><a name='{id}'>{title}</a></h3><div class='subtitle float-right'><a href=\"https://elogy.maxiv.lu.se/logbooks/{logbook_id}/entries/{id}/\">elogy.maxiv.lu.se/logbooks/{logbook_id}/entries/{id}/</a></div><div class='subtitle'>Created {created_at} by {authors}</div></div><div class='content'>{content}</div>".format(title=entry.title or "(No title)",
+    entry_html = "<div class='meta'><h3><a name='{id}'>{title}</a></h3><div class='subtitle float-right'><a href=\"{base_url}/logbooks/{logbook_id}/entries/{id}/\">{base_url}/logbooks/{logbook_id}/entries/{id}/</a></div><div class='subtitle'>Created {created_at} by {authors}</div></div><div class='content'>{content}</div>".format(title=entry.title or "(No title)",
                 authors=", ".join(a["name"] for a in entry.authors),
                 created_at=entry.created_at.strftime('%Y-%m-%d %H:%M'),
                 id=entry.id,
                 logbook_id=entry.logbook_id,
-                content=new_content or "---")
+                content=new_content or "---",
+                base_url=base_url)
     for followup in entry.followups:
         entry_html = entry_html + "<div class='followup'><div class='meta'>Followup created {created_at} by {authors}</div><div class='content'>{content}</div></div>".format(
                 authors=", ".join(a["name"] for a in followup.authors),
