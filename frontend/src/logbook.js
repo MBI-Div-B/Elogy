@@ -42,11 +42,11 @@ class Logbook extends React.Component {
     this.setState({ downloading: true });
     fetch(url, {
       method: "GET",
-      headers: { Accept: "application/pdf" }
+      headers: { Accept: "application/zip" }
     })
       .then(response => response.blob())
       .then(blob => {
-        var newBlob = new Blob([blob], { type: "application/pdf" });
+        var newBlob = new Blob([blob], { type: "application/zip" });
         // IE doesn't allow using a blob object directly as link href
         // instead it is necessary to use msSaveOrOpenBlob
         if (window.navigator && window.navigator.msSaveOrOpenBlob) {
