@@ -35,12 +35,12 @@ export class InnerEntry extends React.Component {
     const url = `/api/download/?entry_id=${this.props.id}&include_attachments=true`;
     fetch(url, {
       method: "GET",
-      headers: { Accept: "application/pdf" }
+      headers: { Accept: "application/zip" }
     })
       .then(response => response.blob())
       .then(blob => {
         this.setState({ downloading: false });
-        var newBlob = new Blob([blob], { type: "application/pdf" });
+        var newBlob = new Blob([blob], { type: "application/zip" });
 
         // IE doesn't allow using a blob object directly as link href
         // instead it is necessary to use msSaveOrOpenBlob
