@@ -1,6 +1,5 @@
 #logbookeditor {
-    background: #ddd;
-    padding: 5px;
+    padding: 0.5em 1em;
 }
 
 #logbookeditor header select {
@@ -28,7 +27,7 @@
     vertical-align: top;
 }
 
-#logbookeditor fieldset.template > div {
+#logbookeditor .template > div {
     height: 200px;
 }
 
@@ -66,4 +65,19 @@
     bottom: 0;
     left: 0;
     right: 0;
+}
+.attribute-panel{
+    padding: 0.5em;
+    margin: 0.5em 0.1em;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 0.1em;
+}
+.button-row{
+    margin: 0em 1em 0.4em 0.25em;
+    display: inline-block;
+}
+.editor-subtitle{
+    font-size: 1.2em;
+    margin: 0.5em 0em 0em 0em;
 }

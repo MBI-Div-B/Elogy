@@ -5,7 +5,6 @@
 #entryeditor table.editor {
     width: 100%;
     height: 100%;
-    background: #ddd;
 }
 
 #entryeditor table.editor td {
@@ -26,7 +25,6 @@
 
 #entryeditor .header {
     padding: 5px;
-    background: #ddd;
     font-size: 90%;
     font-weight: none;
     text-align: left;
@@ -92,11 +90,15 @@
 }
 
 #entryeditor .Select--multi .Select-value {
-    background: #666;
+    background: #026a7b;
     color: white;
     font-size: 100%;
 }
 
+.Select--multi .Select-value-icon:hover,
+.Select--multi .Select-value-icon:focus {
+  color: white;
+}
 #entryeditor .Select--multi .Select-value {
     margin-left: 2px;
     margin-top: 2px;
@@ -160,15 +162,15 @@
 }
 
 
-#entryeditor .commands button {
+/* #entryeditor .commands button {
     font-size: 100%;
     border: 0;
     border-radius: 3px;
     margin: 2px;
     padding: 5px 10px;
-}    
+}     */
 
-#entryeditor button.submit {
+/* #entryeditor button.submit {
     background: green;
     color: white;
 }
@@ -181,7 +183,7 @@
 #entryeditor button.cancel {
     background: red;
     color: white;
-}
+} */
 
 #entryeditor .attachments {
     max-height: 180px;

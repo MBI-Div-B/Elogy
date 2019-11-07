@@ -4,7 +4,7 @@ import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import Mark from "mark.js";
-import {bottomLabel} from "./widgets.js";
+import { notification } from "./widgets.js";
 import "./entry.css";
 import { formatDateTimeString } from "./util.js";
 import { parseQuery } from "./util.js";
@@ -18,7 +18,7 @@ export class InnerEntry extends React.Component {
   constructor() {
     super();
     this.download = this.download.bind(this);
-    this.state = {downloading: false}
+    this.state = { downloading: false };
   }
   componentDidMount() {
     this.highlightContentFilter();
@@ -35,12 +35,12 @@ export class InnerEntry extends React.Component {
     const url = `/api/download/?entry_id=${this.props.id}&include_attachments=true`;
     fetch(url, {
       method: "GET",
-      headers: { Accept: "application/pdf" }
+      headers: { Accept: "application/zip" }
     })
       .then(response => response.blob())
       .then(blob => {
         this.setState({ downloading: false });
-        var newBlob = new Blob([blob], { type: "application/pdf" });
+        var newBlob = new Blob([blob], { type: "application/zip" });
 
         // IE doesn't allow using a blob object directly as link href
         // instead it is necessary to use msSaveOrOpenBlob
@@ -79,7 +79,7 @@ export class InnerEntry extends React.Component {
   }
 
   render() {
-    const {downloading} = this.state;
+    const { downloading } = this.state;
     const logbook = this.props.logbook;
     const followups = this.props.followups
       ? this.props.followups.map((followup, i) => (
@@ -152,17 +152,10 @@ export class InnerEntry extends React.Component {
         <div className="content plain">{this.props.content}</div>
       );
 
-    const link = !this.props.hideLink ? (
-      <Link
-        to={`/logbooks/${logbook.id}/entries/${this.props.id}`}
-        title="A direct link to this entry"
-      >
-        Link
-      </Link>
-    ) : null;
-
     const editLink = !this.props.hideEditLink ? (
       <Link
+        className="btn btn-link"
+        role="button"
         to={{
           pathname: `/logbooks/${logbook.id}/entries/${this.props.id}/edit`,
           search: window.location.search
@@ -174,7 +167,7 @@ export class InnerEntry extends React.Component {
     ) : null;
     return (
       <div>
-        {downloading && bottomLabel("Downloading entry, please wait...")}
+        {downloading && notification("Downloading entry, please wait...")}
         <article ref="article">
           <div
             className={
@@ -183,11 +176,10 @@ export class InnerEntry extends React.Component {
             }
           >
             <div className="commands">
-              {link} {editLink}
-            </div>
-            <div className="commands">
+              {editLink}
               <button
-                className="link-button"
+                type="button"
+                className="btn btn-link"
                 title={`Download this entry and all its attachments`}
                 onClick={() => this.download(logbook.id)}
               >
@@ -286,6 +278,8 @@ class Entry extends React.Component {
             <span className="commands">
               {this.state.follows ? (
                 <Link
+                  className="btn btn-link"
+                  role="button"
                   to={{
                     pathname: `/logbooks/${logbook.id}/entries/${this.state.follows}`,
                     search: window.location.search
@@ -296,6 +290,8 @@ class Entry extends React.Component {
                 </Link>
               ) : null}
               <Link
+                className="btn btn-link"
+                role="button"
                 to={{
                   pathname: `/logbooks/${logbook.id}/entries/${this.state.id}/new`,
                   search: window.location.search
@@ -304,8 +300,9 @@ class Entry extends React.Component {
               >
                 <i className="fa fa-comment" /> New Follow-up
               </Link>
-              &nbsp;|&nbsp;
               <Link
+                className="btn btn-link"
+                role="button"
                 to={{
                   pathname: `/logbooks/${logbook.id}/entries/new`,
                   search: window.location.search
@@ -324,7 +321,7 @@ class Entry extends React.Component {
             }}
           >
             <span className="logbook">
-              <i className="fa fa-book" />{" "}
+              {/* <i className="fa fa-book" />{" "} */}
               {this.state.logbook && this.state.logbook.name}
             </span>
           </Link>
