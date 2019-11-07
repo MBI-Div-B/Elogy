@@ -5,7 +5,9 @@ html, body {
     height: 100%;
 }
 
-
+a{
+    color: #097185;
+}
 #root {
     height: 100%;
 }
@@ -13,6 +15,7 @@ html, body {
 /* Overwritten bootstrap css */
 .btn-link{
     padding: 0em 0.2em;
+    color: #097185;
 }
 
 .form-control-xs {
