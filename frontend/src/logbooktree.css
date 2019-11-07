@@ -63,9 +63,13 @@
 }
 
 #logbooktree li label {
+    cursor: pointer;
     display: inline-block;
     min-width: 1.1em;
     user-select: none;
     color: #097185;
     font-size: 0.8em;
+}
+#logbooktree li label:hover{
+    color: #13a2bd;
 }

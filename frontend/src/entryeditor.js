@@ -111,7 +111,7 @@ class EntryAttributeEditor extends React.Component {
           className="form-control form-control-sm"
             type="number"
             step="any"
-            inputmode="numeric"
+            inputMode="numeric"
             name={config.name}
             value={this.state.value}
             ref="attr"
@@ -125,6 +125,8 @@ class EntryAttributeEditor extends React.Component {
         );
       case "boolean":
         return (
+          <div style={{margin: "0.3em 0.2em"}}>
+          {config.name}
           <input
             type="checkbox"
             checked={this.state.value}
@@ -136,6 +138,7 @@ class EntryAttributeEditor extends React.Component {
             placeholder={config.name}
             title={config.name}
           />
+          </div>
         );
       case "option":
         return (

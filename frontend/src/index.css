@@ -8,6 +8,9 @@ html, body {
 a{
     color: #097185;
 }
+a:hover{
+    color: #13a2bd;
+}
 #root {
     height: 100%;
 }
@@ -16,6 +19,9 @@ a{
 .btn-link{
     padding: 0em 0.2em;
     color: #097185;
+}
+.btn-link:hover{
+    color: #13a2bd;
 }
 
 .form-control-xs {

@@ -90,11 +90,15 @@
 }
 
 #entryeditor .Select--multi .Select-value {
-    background: #666;
+    background: #026a7b;
     color: white;
     font-size: 100%;
 }
 
+.Select--multi .Select-value-icon:hover,
+.Select--multi .Select-value-icon:focus {
+  color: white;
+}
 #entryeditor .Select--multi .Select-value {
     margin-left: 2px;
     margin-top: 2px;
