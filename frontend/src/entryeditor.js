@@ -747,10 +747,12 @@ class EntryEditorNew extends EntryEditorBase {
             </tr>
             <tr>
               <td>
-                {this.getPrioritySelector()}
-                <div className="commands">
-                  {this.getSubmitButton(history)}
-                  {this.getCancelButton()}
+              <div style={{ borderTop: "1px solid #ddd", marginBottom: "1em", paddingTop: "1em" }}>
+                  {this.getPrioritySelector()}
+                  <div className="commands">
+                    {this.getSubmitButton(history)}
+                    {this.getCancelButton()}
+                  </div>
                 </div>
               </td>
             </tr>
@@ -1231,6 +1233,7 @@ class EntryEditorEdit extends EntryEditorBase {
             </tr>
             <tr>
               <td>
+              <div style={{ borderTop: "1px solid #ddd", marginBottom: "1em", paddingTop: "1em" }}>
                 {this.getPrioritySelector()}
                 {this.getArchivedCheckbox()}
                 {this.getLockInfo()}
@@ -1245,6 +1248,7 @@ class EntryEditorEdit extends EntryEditorBase {
                   </button>
                   {this.getSubmitButton(history)}
                   {this.getCancelButton()}
+                </div>
                 </div>
               </td>
             </tr>
