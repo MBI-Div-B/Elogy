@@ -39,7 +39,7 @@ class LogbookAttributeEditor extends React.PureComponent {
           <input
             className="form-control form-control-sm"
             type="text"
-            ref="name"
+            // ref="name"
             value={this.props.name}
             disabled={this.props.existingAttribute}
             onChange={this.onChangeName.bind(this)}
@@ -50,7 +50,7 @@ class LogbookAttributeEditor extends React.PureComponent {
           className="form-control form-control-sm inline-block"
           style={{ width: "10em" }}
           name="type"
-          ref="type"
+          // ref="type"
           value={this.props.type}
           disabled={this.props.existingAttribute}
           onChange={this.onChangeType.bind(this)}
@@ -64,7 +64,7 @@ class LogbookAttributeEditor extends React.PureComponent {
         <label>
           <input
             type="checkbox"
-            ref="required"
+            // ref="required"
             checked={this.props.required}
             onChange={this.onChangeRequired.bind(this)}
           />
@@ -81,7 +81,7 @@ class LogbookAttributeEditor extends React.PureComponent {
           Options:
           <textarea
             rows="3"
-            ref="options"
+            // ref="options"
             title="Choices available for the attribute (one per line)"
             value={(this.props.options || []).join("\n")}
             onChange={this.onChangeOptions.bind(this)}
@@ -99,7 +99,7 @@ class LogbookEditorBase extends React.Component {
        we're creating a new lognbook or editing an existing one. This
        cuts down on the amount of conditional logic.*/
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (this.props.match.params.logbookId > 0) {
       this.fetch();
     }

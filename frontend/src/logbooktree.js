@@ -36,7 +36,7 @@ class LogbookTreeNode extends React.Component {
                 <span>
                     <input
                         type="checkbox"
-                        checked={this.state.expanded}
+                        defaultChecked={this.state.expanded}
                         id={`check-${this.props.id}`}
                         onClick={this.toggle.bind(this)}
                     />
@@ -93,7 +93,7 @@ class LogbookTree extends React.Component {
         this.props.eventbus.subscribe("logbook.reload", this._reload);
     }
 
-    componentWillReceiveProps({ location }) {
+    UNSAFE_componentWillReceiveProps({ location }) {
         const query = parseQuery(location.search);
         if ((query.parent || null) !== (this.state.parent || null))
             this.fetch(location.search);

@@ -1,6 +1,6 @@
 /* Displays a logbook and the entries in it, after optional filtering */
 
-import React, { Fragment } from "react";
+import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import update from "immutability-helper";
@@ -122,13 +122,13 @@ class Logbook extends React.Component {
       });
   }
 
-  componentWillReceiveProps(props) {
+  UNSAFE_componentWillReceiveProps(props) {
     const params = new URLSearchParams(props.location.search);
-    const sortBy = params.get("sort_by");
+    const sortBy = params.get("sort_by") || "created";
     this.setState({ sortBy });
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.fetch(
       this.props.match.params.logbookId,
       this.props.location.search,
@@ -137,7 +137,7 @@ class Logbook extends React.Component {
     );
   }
 
-  componentWillUpdate(newProps, newState) {
+  UNSAFE_componentWillUpdate(newProps, newState) {
     // if needed, we fetch info from the server
     if (
       newProps.match.params.logbookId !== this.props.match.params.logbookId ||

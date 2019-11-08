@@ -97,7 +97,7 @@ class EntryAttributeEditor extends React.Component {
             type="text"
             value={this.state.value}
             name={config.name}
-            ref="attr"
+            // ref="attr"
             required={required}
             onChange={this.onChange.bind(this)}
             onBlur={this.onBlur.bind(this)}
@@ -108,13 +108,13 @@ class EntryAttributeEditor extends React.Component {
       case "number":
         return (
           <input
-          className="form-control form-control-sm"
+            className="form-control form-control-sm"
             type="number"
             step="any"
             inputMode="numeric"
             name={config.name}
             value={this.state.value}
-            ref="attr"
+            // ref="attr"
             required={required}
             onKeyPress={this.onKeypressNumber}
             onChange={this.onChange.bind(this)}
@@ -125,19 +125,19 @@ class EntryAttributeEditor extends React.Component {
         );
       case "boolean":
         return (
-          <div style={{margin: "0.3em 0.2em"}}>
-          {config.name}
-          <input
-            type="checkbox"
-            checked={this.state.value}
-            name={config.name}
-            ref="attr"
-            required={required}
-            onChange={this.onChangeBoolean.bind(this)}
-            onBlur={this.onBlur.bind(this)}
-            placeholder={config.name}
-            title={config.name}
-          />
+          <div style={{ margin: "0.3em 0.2em" }}>
+            {config.name}
+            <input
+              type="checkbox"
+              checked={this.state.value}
+              name={config.name}
+              // ref="attr"
+              required={required}
+              onChange={this.onChangeBoolean.bind(this)}
+              onBlur={this.onBlur.bind(this)}
+              placeholder={config.name}
+              title={config.name}
+            />
           </div>
         );
       case "option":
@@ -177,7 +177,11 @@ class EntryAttributeEditor extends React.Component {
   render() {
     const className = `attribute-wrapper ${this.props.config.type}-attribute`;
     return (
-      <div className={className} style={{verticalAlign: "top"}} title={this.props.config.name}>
+      <div
+        className={className}
+        style={{ verticalAlign: "top" }}
+        title={this.props.config.name}
+      >
         {this.makeInputElement()}
       </div>
     );
@@ -212,7 +216,7 @@ class EntryEditorBase extends React.Component {
     );
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     window.onbeforeunload = e => this.getPromptMessage();
   }
 
@@ -335,10 +339,11 @@ class EntryEditorBase extends React.Component {
   getTitleEditor(title) {
     return (
       <input
+        autoFocus={true}
         type="text"
         className="form-control form-control-sm"
         placeholder="Title for the new entry..."
-        ref="title"
+        // ref="title"
         value={title || ""}
         required={true}
         onChange={this.onTitleChange.bind(this)}
@@ -351,7 +356,7 @@ class EntryEditorBase extends React.Component {
       <Async
         name="authors"
         placeholder="Authors"
-        ref="authors"
+        // ref="authors"
         valueRenderer={o => o.name}
         multi={true}
         value={authors}
@@ -516,11 +521,13 @@ class EntryEditorBase extends React.Component {
       >
         <button
           onClick={() => {
-            this.releaseLock(
-              this.state.logbook.id,
-              this.state.entry.id,
-              this.state.lock.id
-            );
+            if (this.state.lock) {
+              this.releaseLock(
+                this.state.logbook.id,
+                this.state.entry.id,
+                this.state.lock.id
+              );
+            }
             this.setState({
               redirect: `/logbooks/${this.state.logbook.id}/entries/${this.state.entry.id}`
             });
@@ -609,8 +616,8 @@ class EntryEditorBase extends React.Component {
 class EntryEditorNew extends EntryEditorBase {
   /* editor for creating a brand new entry */
 
-  componentWillMount() {
-    super.componentWillMount();
+  UNSAFE_componentWillMount() {
+    super.UNSAFE_componentWillMount();
     // Preload with authors from last new entry during this session, for convenience.
     this.loadSessionAuthors();
     this.fetchLogbook(this.props.match.params.logbookId);
@@ -703,49 +710,53 @@ class EntryEditorNew extends EntryEditorBase {
         <Prompt message={this.getPromptMessage.bind(this)} />
 
         <table className="editor">
-          <tr>
-            <th className="title">
-              New entry in{" "}
-              <span className="logbook">
-                {/* <i className="fa fa-book" />{" "} */}
-                {this.state.logbook.name || "[unknown]"}
-              </span>
-            </th>
-          </tr>
-          <tr>
-            <td>{this.getTitleEditor(this.state.title)}</td>
-          </tr>
-          <tr>
-            <td>{this.getAuthorsEditor(this.state.authors)}</td>
-          </tr>
-          <tr>
-            <td className="attributes">
-              {this.getAttributesEditors(this.getAttributes())}
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <th className="title">
+                New entry in{" "}
+                <span className="logbook">
+                  {/* <i className="fa fa-book" />{" "} */}
+                  {this.state.logbook.name || "[unknown]"}
+                </span>
+              </th>
+            </tr>
+            <tr>
+              <td>{this.getTitleEditor(this.state.title)}</td>
+            </tr>
+            <tr>
+              <td>{this.getAuthorsEditor(this.state.authors)}</td>
+            </tr>
+            <tr>
+              <td className="attributes">
+                {this.getAttributesEditors(this.getAttributes())}
+              </td>
+            </tr>
 
-          <tr>
-            <td className="content">
-              {this.getContentHTMLEditor(
-                this.state.content || this.state.logbook.template
-              )}
-            </td>
-          </tr>
-          <tr>
-            <td>{this.getAttachments(this.state.attachments)}</td>
-          </tr>
-          <tr>
-            <td>{this.getError()}</td>
-          </tr>
-          <tr>
-            <td>
-              {this.getPrioritySelector()}
-              <div className="commands">
-                {this.getSubmitButton(history)}
-                {this.getCancelButton()}
-              </div>
-            </td>
-          </tr>
+            <tr>
+              <td className="content">
+                {this.getContentHTMLEditor(
+                  this.state.content || this.state.logbook.template
+                )}
+              </td>
+            </tr>
+            <tr>
+              <td>{this.getAttachments(this.state.attachments)}</td>
+            </tr>
+            <tr>
+              <td>{this.getError()}</td>
+            </tr>
+            <tr>
+              <td>
+              <div style={{ borderTop: "1px solid #ddd", marginBottom: "1em", paddingTop: "1em" }}>
+                  {this.getPrioritySelector()}
+                  <div className="commands">
+                    {this.getSubmitButton(history)}
+                    {this.getCancelButton()}
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     );
@@ -755,8 +766,8 @@ class EntryEditorNew extends EntryEditorBase {
 class EntryEditorFollowup extends EntryEditorBase {
   /* editor for creating a followup to an existing entry */
 
-  componentWillMount() {
-    super.componentWillMount();
+  UNSAFE_componentWillMount() {
+    super.UNSAFE_componentWillMount();
     this.fetchEntry(
       this.props.match.params.logbookId,
       this.props.match.params.entryId
@@ -860,55 +871,57 @@ class EntryEditorFollowup extends EntryEditorBase {
         <Prompt message={this.getPromptMessage.bind(this)} />
 
         <table className="editor">
-          <tr>
-            <th className="title">
-              Followup to {this.state.entry.title} in{" "}
-              <span className="logbook">
-                {" "}
-                {/* <i className="fa fa-book" />  */}
-                {this.state.logbook.name || "ehe"}
-              </span>
-            </th>
-          </tr>
-          <tr className="entry">
-            <td className="entry">
-              <div className="entry">
-                <InnerEntry
-                  hideLink={true}
-                  hideEditLink={true}
-                  {...this.state.entry}
-                />
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>{this.getAuthorsEditor(this.state.authors)}</td>
-          </tr>
-          <tr className="attributes">
-            <td>{this.getAttributesEditors(this.getAttributes())}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <th className="title">
+                Followup to {this.state.entry.title} in{" "}
+                <span className="logbook">
+                  {" "}
+                  {/* <i className="fa fa-book" />  */}
+                  {this.state.logbook.name || "ehe"}
+                </span>
+              </th>
+            </tr>
+            <tr className="entry">
+              <td className="entry">
+                <div className="entry">
+                  <InnerEntry
+                    hideLink={true}
+                    hideEditLink={true}
+                    {...this.state.entry}
+                  />
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>{this.getAuthorsEditor(this.state.authors)}</td>
+            </tr>
+            <tr className="attributes">
+              <td>{this.getAttributesEditors(this.getAttributes())}</td>
+            </tr>
 
-          <tr>
-            <td className="content">
-              {this.getContentHTMLEditor(
-                this.state.content || this.state.logbook.template
-              )}
-            </td>
-          </tr>
-          <tr>
-            <td>{this.getAttachments(this.state.attachments)}</td>
-          </tr>
-          <tr>
-            <td>{this.getError()}</td>
-          </tr>
-          <tr>
-            <td>
-              <div className="commands">
-                {this.getSubmitButton(history)}
-                {this.getCancelButton()}
-              </div>
-            </td>
-          </tr>
+            <tr>
+              <td className="content">
+                {this.getContentHTMLEditor(
+                  this.state.content || this.state.logbook.template
+                )}
+              </td>
+            </tr>
+            <tr>
+              <td>{this.getAttachments(this.state.attachments)}</td>
+            </tr>
+            <tr>
+              <td>{this.getError()}</td>
+            </tr>
+            <tr>
+              <td>
+                <div className="commands">
+                  {this.getSubmitButton(history)}
+                  {this.getCancelButton()}
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     );
@@ -957,8 +970,8 @@ class EntryEditorEdit extends EntryEditorBase {
       });
   }
 
-  componentWillMount() {
-    super.componentWillMount();
+  UNSAFE_componentWillMount() {
+    super.UNSAFE_componentWillMount();
     this.fetchLogbook(this.props.match.params.logbookId);
     this.fetchEntry(
       this.props.match.params.logbookId,
@@ -1175,65 +1188,71 @@ class EntryEditorEdit extends EntryEditorBase {
         <Prompt message={this.getPromptMessage.bind(this)} />
 
         <table className="editor">
-          <tr>
-            <th className="header">
-              Editing entry #{this.state.id} in logbook{" "}
-              {this.state.follows ? (
-                this.state.logbook.name
-              ) : (
-                <MoveEntryWidget
-                  selectedLogbook={this.state.logbookId || this.state.logbook.id}
-                  onLogbookChange={this.onLogbookChange.bind(this)}
-                />
-              )}
-            </th>
-          </tr>
-          <tr>
-            <td>
-              {this.state.follows
-                ? null
-                : this.getTitleEditor(this.state.title)}
-            </td>
-          </tr>
-          <tr>
-            <td>{this.getAuthorsEditor(this.state.authors)}</td>
-          </tr>
-          <tr className="attributes">
-            <td>{this.getAttributesEditors(this.getAttributes())}</td>
-          </tr>
+          <tbody>
+            <tr>
+              <th className="header">
+                Editing entry #{this.state.id} in logbook{" "}
+                {this.state.follows ? (
+                  this.state.logbook.name
+                ) : (
+                  <MoveEntryWidget
+                    selectedLogbook={
+                      this.state.logbookId || this.state.logbook.id
+                    }
+                    onLogbookChange={this.onLogbookChange.bind(this)}
+                  />
+                )}
+              </th>
+            </tr>
+            <tr>
+              <td>
+                {this.state.follows
+                  ? null
+                  : this.getTitleEditor(this.state.title)}
+              </td>
+            </tr>
+            <tr>
+              <td>{this.getAuthorsEditor(this.state.authors)}</td>
+            </tr>
+            <tr className="attributes">
+              <td>{this.getAttributesEditors(this.getAttributes())}</td>
+            </tr>
 
-          <tr>
-            <td className="content">
-              {this.getContentHTMLEditor(
-                this.state.content || this.state.logbook.template
-              )}
-            </td>
-          </tr>
-          <tr>
-            <td>{this.getAttachments(this.state.attachments)}</td>
-          </tr>
-          <tr>
-            <td>{this.getError()}</td>
-          </tr>
-          <tr>
-            <td>
-              {this.getPrioritySelector()}
-              {this.getArchivedCheckbox()}
-              {this.getLockInfo()}
+            <tr>
+              <td className="content">
+                {this.getContentHTMLEditor(
+                  this.state.content || this.state.logbook.template
+                )}
+              </td>
+            </tr>
+            <tr>
+              <td>{this.getAttachments(this.state.attachments)}</td>
+            </tr>
+            <tr>
+              <td>{this.getError()}</td>
+            </tr>
+            <tr>
+              <td>
+              <div style={{ borderTop: "1px solid #ddd", marginBottom: "1em", paddingTop: "1em" }}>
+                {this.getPrioritySelector()}
+                {this.getArchivedCheckbox()}
+                {this.getLockInfo()}
 
-              <div className="commands">
-                <button
-                  className="btn btn-secondary btn-sm ml-1"
-                  title="Save the entry"
-                  onClick={this.onSave.bind(this, history)}
-                >
-                  Save
-                </button>
-                {this.getSubmitButton(history)}
-                {this.getCancelButton()}
-              </div>
-            </td>
-          </tr>
+                <div className="commands">
+                  <button
+                    className="btn btn-secondary btn-sm ml-1"
+                    title="Save the entry"
+                    onClick={this.onSave.bind(this, history)}
+                  >
+                    Save
+                  </button>
+                  {this.getSubmitButton(history)}
+                  {this.getCancelButton()}
+                </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
     );

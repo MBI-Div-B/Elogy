@@ -168,7 +168,7 @@ export class InnerEntry extends React.Component {
     return (
       <div>
         {downloading && notification("Downloading entry, please wait...")}
-        <article ref="article">
+        <article ref="article">{/*ref needed for scrollIntoView*/}
           <div
             className={
               "info" +
@@ -235,14 +235,14 @@ class Entry extends React.Component {
       .then(json => this.setState({ loading: false, ...json.entry }));
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.fetchEntry(
       this.props.match.params.logbookId,
       this.props.match.params.entryId
     );
   }
 
-  componentWillReceiveProps(newProps) {
+  UNSAFE_componentWillReceiveProps(newProps) {
     if (
       newProps.match.params.entryId !== this.state.id ||
       (this.state.logbook &&
@@ -264,7 +264,7 @@ class Entry extends React.Component {
 
     const query = parseQuery(this.props.location.search);
     return (
-      <div className="container" ref="container">
+      <div className="container">{/* ref="container"*/}
         <button
           className="mobile-back-button"
           onClick={() => this.props.history.push("/logbooks/" + logbook.id)}
@@ -331,7 +331,7 @@ class Entry extends React.Component {
 
         {/* The body is scrollable */}
         <div className="body">
-          <div ref="body">
+          <div>{/* ref="body"*/}
             <InnerEntry
               {...this.state}
               contentFilter={query.content}
