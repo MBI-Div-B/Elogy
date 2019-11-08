@@ -84,7 +84,7 @@ class QuickSearch extends React.Component {
               value={this.state.title || ""}
               title="Filter entries on title (supports regular expressions)"
               type="text"
-              ref="title"
+              // ref="title"
               placeholder="Title"
               onChange={this.onChange.bind(this)}
             />
@@ -94,7 +94,7 @@ class QuickSearch extends React.Component {
               value={this.state.content || ""}
               title="Filter entries on contents (supports regular expressions)"
               type="text"
-              ref="content"
+              // ref="content"
               placeholder="Content"
               onChange={this.onChange.bind(this)}
             />
@@ -104,7 +104,7 @@ class QuickSearch extends React.Component {
               value={this.state.authors || ""}
               title="Filter entries on authors (supports regular expressions)"
               type="text"
-              ref="authors"
+              // ref="authors"
               placeholder="Authors"
               onChange={this.onChange.bind(this)}
             />
@@ -114,7 +114,7 @@ class QuickSearch extends React.Component {
               value={this.state.attachments || ""}
               title="Filter entries on attachments (supports regular expressions)"
               type="text"
-              ref="attachments"
+              // ref="attachments"
               placeholder="Attachments"
               onChange={this.onChange.bind(this)}
             />

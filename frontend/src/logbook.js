@@ -1,6 +1,6 @@
 /* Displays a logbook and the entries in it, after optional filtering */
 
-import React, { Fragment } from "react";
+import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import update from "immutability-helper";
@@ -124,7 +124,7 @@ class Logbook extends React.Component {
 
   componentWillReceiveProps(props) {
     const params = new URLSearchParams(props.location.search);
-    const sortBy = params.get("sort_by");
+    const sortBy = params.get("sort_by") || "created";
     this.setState({ sortBy });
   }
 

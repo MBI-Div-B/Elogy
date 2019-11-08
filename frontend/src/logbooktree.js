@@ -36,7 +36,7 @@ class LogbookTreeNode extends React.Component {
                 <span>
                     <input
                         type="checkbox"
-                        checked={this.state.expanded}
+                        defaultChecked={this.state.expanded}
                         id={`check-${this.props.id}`}
                         onClick={this.toggle.bind(this)}
                     />
