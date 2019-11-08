@@ -103,13 +103,13 @@ background: repeating-linear-gradient(
     opacity: 1;
 }
 
-#logbook dd.entry.pinned {
+/* #logbook dd.entry.pinned {
     background-color: #ffb;
 }
 
 #logbook dd.entry.important {
     background-color: #fdd;
-}
+} */
 
 #logbook .entries-container .entry a {
     text-decoration: none;
@@ -224,15 +224,13 @@ background: repeating-linear-gradient(
 
 
 #logbook dt.pinned {
-    background: yellow;
-    color: black;
-    border-color: black;
+    background: #ffffb3;
+    color: #84840d;
 }
 
 #logbook dt.important {
-    background: red;
-    color: white;
-    border-color: black;
+    background: #ffbebe;
+    color: #861818;
 }
 
 #logbook .attributes {

@@ -47,7 +47,7 @@ export class LocalAttachmentPreview extends React.Component {
 
     render() {
         if (this.props.attachment.type.split("/")[0] === "image") {
-            return <img ref="image" width="100" alt="" />;
+            return <img width="100" alt="" />;//ref="image"
         }
         const iconClass =
             ICON_CLASS_MAP[this.props.attachment.type] || "fa fa-file-o fa-2x";
@@ -95,9 +95,8 @@ export const AttachmentPreview = ({ attachment }) => (
 
 export const EntryAttachments = ({ attachments, onRemove }) => (
     <div className="attachments">
-        <table>
             {attachments.map((att, i) => (
-                <tbody className="attachment" key={i} title={att.filename}>
+                <div className="attachment" key={i} title={att.filename}>
                     {onRemove ? 
                         <div className="attachment-delete"><button
                         className="delete"
@@ -105,9 +104,8 @@ export const EntryAttachments = ({ attachments, onRemove }) => (
                         onClick={onRemove.bind(this, i)}
                     > x </button> </div>: null}
                     <AttachmentPreview attachment={att} />
-                </tbody>
+                </div>
             ))}
-        </table>
     </div>
 );
 
