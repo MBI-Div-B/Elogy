@@ -34,8 +34,10 @@
 #logbookeditor span.error {
     width: 100%;
     text-align: center;
-    background: red;
-    color: white;
+    background: #f9d3d3;
+    color: #751616;
+    padding: 0.1em 1em;
+    border-radius: 0.2em;
 }
 
 .mce-tinymce:not(.mce-floatpanel), .mce-container-body:not(.mce-abs-layout), #code_ifr {
