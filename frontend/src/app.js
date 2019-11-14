@@ -173,11 +173,11 @@ class Elogy extends React.Component {
         <div id="app">
           {!this.state.hideLogbookTree ? (
             <div id="logbooks">
-              <Login
+              {process.env.REACT_APP_JWT_AUTH && <Login
                 loggedInUser={loggedInUser}
                 onLogin={this.onLogin}
                 onLogout={this.onLogout}
-              ></Login>
+              ></Login>}
               <Switch>
                 <Route
                   path="/logbooks/:logbookId"
