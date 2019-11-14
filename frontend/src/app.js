@@ -108,6 +108,9 @@ class Elogy extends React.Component {
     this._hideLogbook = this._hideLogbook.bind(this);
     this.onLogin = this.onLogin.bind(this);
     this.onLogout = this.onLogout.bind(this);
+
+    console.log("REACT_APP_JWT_AUTH")
+    console.log(process.env.REACT_APP_JWT_AUTH)
   }
 
   async componentDidMount() {
