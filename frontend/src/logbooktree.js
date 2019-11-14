@@ -43,11 +43,9 @@ class LogbookTreeNode extends React.Component {
                     <label htmlFor={`check-${this.props.id}`} />
                 </span>
             ) : null;
-
         return (
             <li
                 key={this.props.id}
-                title={this.props.description || null}
                 className={
                     (this.props.selectedLogbookId === this.props.id
                         ? "selected "
@@ -57,12 +55,14 @@ class LogbookTreeNode extends React.Component {
             >
                 {expander}
                 <Link
+                title={this.props.description}
                     to={{
                         pathname: `/logbooks/${this.props.id}`,
                         search: window.location.search
                     }}
                 >
-                    {this.props.name}
+                    {this.props.name}{" "}
+                    {this.props.user_group && <i title={`Only visible to ${this.props.user_group}`} className="fa fa-lock" />}
                 </Link>
                 {children}
             </li>

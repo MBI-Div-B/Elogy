@@ -30,37 +30,35 @@ export class InnerEntry extends React.Component {
     this.scrollToCurrentEntry();
   }
 
-  download() {
+  async download() {
     this.setState({ downloading: true });
     const url = `/api/download/?entry_id=${this.props.id}&include_attachments=true`;
-    fetch(url, {
+    const response = await fetch(url, {
       method: "GET",
       headers: { Accept: "application/zip" }
-    })
-      .then(response => response.blob())
-      .then(blob => {
-        this.setState({ downloading: false });
-        var newBlob = new Blob([blob], { type: "application/zip" });
+    });
+    const blob = await response.blob();
+    this.setState({ downloading: false });
+    var newBlob = new Blob([blob], { type: "application/zip" });
 
-        // IE doesn't allow using a blob object directly as link href
-        // instead it is necessary to use msSaveOrOpenBlob
-        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-          window.navigator.msSaveOrOpenBlob(newBlob);
-          return;
-        }
+    // IE doesn't allow using a blob object directly as link href
+    // instead it is necessary to use msSaveOrOpenBlob
+    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveOrOpenBlob(newBlob);
+      return;
+    }
 
-        // For other browsers:
-        // Create a link pointing to the ObjectURL containing the blob.
-        const data = window.URL.createObjectURL(newBlob);
-        var link = document.createElement("a");
-        link.href = data;
-        link.download = "elogy_entry_" + this.props.id + ".zip";
-        link.click();
-        setTimeout(function() {
-          // For Firefox it is necessary to delay revoking the ObjectURL
-          window.URL.revokeObjectURL(data);
-        }, 100);
-      });
+    // For other browsers:
+    // Create a link pointing to the ObjectURL containing the blob.
+    const data = window.URL.createObjectURL(newBlob);
+    var link = document.createElement("a");
+    link.href = data;
+    link.download = "elogy_entry_" + this.props.id + ".zip";
+    link.click();
+    setTimeout(function() {
+      // For Firefox it is necessary to delay revoking the ObjectURL
+      window.URL.revokeObjectURL(data);
+    }, 100);
   }
 
   scrollToCurrentEntry() {
@@ -168,7 +166,7 @@ export class InnerEntry extends React.Component {
     return (
       <div>
         {downloading && notification("Downloading entry, please wait...")}
-        <article ref="article">{/*ref needed for scrollIntoView*/}
+        <article ref="article">
           <div
             className={
               "info" +
@@ -223,32 +221,54 @@ class Entry extends React.Component {
       logbook: null,
       title: "",
       authors: [],
-      content: ""
+      content: "",
+      loadError: ""
     };
   }
 
-  fetchEntry(logbookId, entryId) {
-    fetch(`/api/logbooks/${logbookId}/entries/${entryId}/?thread=true`, {
-      headers: { Accept: "application/json" }
-    })
-      .then(response => response.json())
-      .then(json => this.setState({ loading: false, ...json.entry }));
+  async fetchEntry(logbookId, entryId) {
+    const response = await fetch(
+      `/api/logbooks/${logbookId}/entries/${entryId}/?thread=true`,
+      {
+        headers: { Accept: "application/json" }
+      }
+    );
+    if (!response.ok) {
+      switch (response.status) {
+        case 401:
+          this.setState({
+            loading: false,
+            loadError: "You are not authorized to view this entry"
+          });
+          break;
+        default:
+          this.setState({
+            loading: false,
+            loadError:
+              "Unable to load entry, the server responsed with code " +
+              response.status
+          });
+      }
+      return;
+    }
+    const json = await response.json();
+    this.setState({ loadError: "", loading: false, ...json.entry });
   }
 
-  UNSAFE_componentWillMount() {
-    this.fetchEntry(
+  async UNSAFE_componentWillMount() {
+    await this.fetchEntry(
       this.props.match.params.logbookId,
       this.props.match.params.entryId
     );
   }
 
-  UNSAFE_componentWillReceiveProps(newProps) {
+  async UNSAFE_componentWillReceiveProps(newProps) {
     if (
       newProps.match.params.entryId !== this.state.id ||
       (this.state.logbook &&
         newProps.match.params.logbookId !== this.state.logbook.id)
     ) {
-      this.fetchEntry(
+      await this.fetchEntry(
         newProps.match.params.logbookId,
         newProps.match.params.entryId
       );
@@ -256,15 +276,21 @@ class Entry extends React.Component {
   }
 
   render() {
-    if (!(this.state.id && this.state.logbook)) {
+    const { logbook, id, loadError } = this.state;
+    if (!(id && logbook)) {
       return <div />; // placeholder
     }
-
-    const logbook = this.state.logbook;
+    if (loadError) {
+      return (
+        <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
+          {loadError}
+        </div>
+      );
+    }
 
     const query = parseQuery(this.props.location.search);
     return (
-      <div className="container">{/* ref="container"*/}
+      <div className="container">
         <button
           className="mobile-back-button"
           onClick={() => this.props.history.push("/logbooks/" + logbook.id)}
@@ -274,7 +300,7 @@ class Entry extends React.Component {
         </button>
         {/* The header will always stay at the top */}
         <header>
-          {this.state.logbook ? (
+          {logbook ? (
             <span className="commands">
               {this.state.follows ? (
                 <Link
@@ -331,7 +357,7 @@ class Entry extends React.Component {
 
         {/* The body is scrollable */}
         <div className="body">
-          <div>{/* ref="body"*/}
+          <div>
             <InnerEntry
               {...this.state}
               contentFilter={query.content}

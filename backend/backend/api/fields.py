@@ -49,6 +49,8 @@ logbook_short = {
     "name": fields.String,
     "description": fields.String,
     "children": NonArchivedList(LogbookField),
+    "user_group": fields.String,
+    "owner": fields.String,
 }
 
 
@@ -65,7 +67,9 @@ logbook = {
     "children": NonArchivedList(LogbookField),
     "attributes": fields.List(fields.Nested(attribute)),
     "metadata": fields.Raw,
-    "archived": fields.Boolean
+    "archived": fields.Boolean,
+    "user_group": fields.String,
+    "owner": fields.String,
 }
 
 

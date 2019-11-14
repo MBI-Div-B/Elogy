@@ -1,6 +1,7 @@
 export async function login(username, password) {
   try {
-    const resp = await fetch("https://jwt-auth.maxiv.lu.se/v1/login", {
+    console.log(process.env.REACT_APP_JWT_AUTH)
+    const resp = await fetch(process.env.REACT_APP_JWT_AUTH, {
       method: "POST",
       headers: {
         Accept: "application/json",

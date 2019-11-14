@@ -22,3 +22,4 @@ Werkzeug==0.14.1
 wtf-peewee==0.2.6
 WTForms==2.1
 WeasyPrint==50
+requests==2.22.0
