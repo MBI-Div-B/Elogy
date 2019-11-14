@@ -1,5 +1,6 @@
 from tempfile import NamedTemporaryFile
 from .db import Entry, Logbook
+from .utils import has_access
 import sys
 import time
 import base64
@@ -17,6 +18,8 @@ def export_logbook_as_html(logbook_id, include_attachments):
     Exports a logbook as a html file
     """
     logbook = Logbook.get(Logbook.id == logbook_id)
+    if not has_access(logbook_id=logbook_id):
+        raise Exception("401")
     table_of_content = "<div><h2>Logbook " + logbook.name + "</h2><ul>"
     html_body = ""
     for entry in logbook.get_all_entries():

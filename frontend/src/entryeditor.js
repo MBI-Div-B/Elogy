@@ -206,7 +206,8 @@ class EntryEditorBase extends React.Component {
       content: null,
       priority: 0,
       lock: null,
-      error: null
+      error: null,
+      loadError: "",
     };
     // we don't want to stress the backend by searching for users
     // at every keystroke so we'll limit the rate a little.
@@ -224,39 +225,77 @@ class EntryEditorBase extends React.Component {
     window.onbeforeunload = null;
   }
 
-  fetchEntry(logbookId, entryId, fill) {
+  async fetchEntry(logbookId, entryId, fill) {
     // get all data for the given entry from the backend
-    fetch(`/api/logbooks/${logbookId}/entries/${entryId}/`, {
-      headers: { Accept: "application/json" }
-    })
-      .then(response => response.json())
-      .then(json => {
-        if (fill) this.setState({ entry: json.entry, ...json.entry });
-        else this.setState(json);
-      });
+    const response = await fetch(
+      `/api/logbooks/${logbookId}/entries/${entryId}/`,
+      {
+        headers: { Accept: "application/json" }
+      }
+    );
+    if (!response.ok) {
+      switch (response.status) {
+        case 401:
+          this.setState({
+            loading: false,
+            loadError: "You are not authorized to view this entry"
+          });
+          break;
+        default:
+          this.setState({
+            loading: false,
+            loadError:
+              "Unable to load entry, the server responsed with code " +
+              response.status
+          });
+      }
+      return;
+    }
+    const json = await response.json();
+    if (fill) {
+      this.setState({ loadError: "", entry: json.entry, ...json.entry });
+    } else {
+      this.setState({loadError: "", ...json});
+    }
   }
 
-  fetchLogbook(logbookId) {
+  async fetchLogbook(logbookId) {
     // get data for the given logbook from the backend
-    fetch(`/api/logbooks/${logbookId}/`, {
+    const response = await fetch(`/api/logbooks/${logbookId}/`, {
       headers: { Accept: "application/json" }
-    })
-      .then(response => response.json())
-      .then(json => this.setState(json));
+    });
+    if (!response.ok) {
+      switch (response.status) {
+        case 401:
+          this.setState({
+            loading: false,
+            loadError: "You are not authorized to view this entry"
+          });
+          break;
+        default:
+          this.setState({
+            loading: false,
+            loadError:
+              "Unable to load entry, the server responsed with code " +
+              response.status
+          });
+      }
+      return;
+    }
+    const json = await response.json();
+    this.setState(json);
   }
 
-  fetchUserSuggestions(input, callback) {
+  async fetchUserSuggestions(input, callback) {
     // search for author names
-    return fetch(`/api/users/?search=${input}`, {
+    const response = await fetch(`/api/users/?search=${input}`, {
       headers: { Accept: "application/json" }
-    })
-      .then(response => response.json())
-      .then(response => {
-        callback(null, {
-          options: (this.state.authors || []).concat(response.users),
-          complete: false
-        });
-      });
+    });
+    const json = await response.json();
+    callback(null, {
+      options: (this.state.authors || []).concat(json.users),
+      complete: false
+    });
   }
 
   storeSessionAuthors() {
@@ -283,8 +322,6 @@ class EntryEditorBase extends React.Component {
     this.setState(
       update(this.state, { attributes: { [name]: { $set: value } } })
     );
-    /* else
-     *     this.setState(update(this.state, {attributes: {$unset: [name]}}));*/
   }
 
   onContentChange(newValue) {
@@ -700,6 +737,13 @@ class EntryEditorNew extends EntryEditorBase {
   }
 
   renderInner(history) {
+    if (this.state.loadError) {
+      return (
+        <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
+          {this.state.loadError}
+        </div>
+      );
+    }
     if (!this.state.logbook) return <div>Loading...</div>;
 
     // Using a table here, because TinyMCE sometimes does not play well with
@@ -747,7 +791,13 @@ class EntryEditorNew extends EntryEditorBase {
             </tr>
             <tr>
               <td>
-              <div style={{ borderTop: "1px solid #ddd", marginBottom: "1em", paddingTop: "1em" }}>
+                <div
+                  style={{
+                    borderTop: "1px solid #ddd",
+                    marginBottom: "1em",
+                    paddingTop: "1em"
+                  }}
+                >
                   {this.getPrioritySelector()}
                   <div className="commands">
                     {this.getSubmitButton(history)}
@@ -864,6 +914,13 @@ class EntryEditorFollowup extends EntryEditorBase {
   }
 
   renderInner(history) {
+    if (this.state.loadError) {
+      return (
+        <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
+          {this.state.loadError}
+        </div>
+      );
+    }
     if (!this.state.logbook || !this.state.entry) return <div>Loading...</div>;
 
     return (
@@ -1180,6 +1237,13 @@ class EntryEditorEdit extends EntryEditorBase {
   }
 
   renderInner(history) {
+    if (this.state.loadError) {
+      return (
+        <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
+          {this.state.loadError}
+        </div>
+      );
+    }
     if (!(this.state.logbook && this.state.entry)) return <div>Loading...</div>;
 
     return (
@@ -1233,22 +1297,28 @@ class EntryEditorEdit extends EntryEditorBase {
             </tr>
             <tr>
               <td>
-              <div style={{ borderTop: "1px solid #ddd", marginBottom: "1em", paddingTop: "1em" }}>
-                {this.getPrioritySelector()}
-                {this.getArchivedCheckbox()}
-                {this.getLockInfo()}
+                <div
+                  style={{
+                    borderTop: "1px solid #ddd",
+                    marginBottom: "1em",
+                    paddingTop: "1em"
+                  }}
+                >
+                  {this.getPrioritySelector()}
+                  {this.getArchivedCheckbox()}
+                  {this.getLockInfo()}
 
-                <div className="commands">
-                  <button
-                    className="btn btn-secondary btn-sm ml-1"
-                    title="Save the entry"
-                    onClick={this.onSave.bind(this, history)}
-                  >
-                    Save
-                  </button>
-                  {this.getSubmitButton(history)}
-                  {this.getCancelButton()}
-                </div>
+                  <div className="commands">
+                    <button
+                      className="btn btn-secondary btn-sm ml-1"
+                      title="Save the entry"
+                      onClick={this.onSave.bind(this, history)}
+                    >
+                      Save
+                    </button>
+                    {this.getSubmitButton(history)}
+                    {this.getCancelButton()}
+                  </div>
                 </div>
               </td>
             </tr>

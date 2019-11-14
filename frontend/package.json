@@ -16,7 +16,8 @@
     "react-dropzone": "3.13.0",
     "react-lazy-load": "^3.0.13",
     "react-router-dom": "^5.1.2",
-    "react-select": "1.0.0-rc.5"
+    "react-select": "1.0.0-rc.5",
+    "universal-cookie": "^4.0.2"
   },
   "devDependencies": {
     "react-scripts": "0.9.5"

@@ -30,6 +30,7 @@ class Logbook extends React.Component {
       attributeFilters: {},
       loading: false,
       downloading: false,
+      loadError: "", //if truthy, we've failed to load the logbook
       moreEntries: true,
       sortBy: "created"
     };
@@ -37,45 +38,41 @@ class Logbook extends React.Component {
     this.download = this.download.bind(this);
   }
   //download logbook as html
-  download() {
+  async download() {
     const url = `/api/download/?logbook_id=${this.state.logbook.id}&include_attachments=true`;
     this.setState({ downloading: true });
-    fetch(url, {
+    const response = await fetch(url, {
       method: "GET",
       headers: { Accept: "application/zip" }
-    })
-      .then(response => response.blob())
-      .then(blob => {
-        var newBlob = new Blob([blob], { type: "application/zip" });
-        // IE doesn't allow using a blob object directly as link href
-        // instead it is necessary to use msSaveOrOpenBlob
-        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-          window.navigator.msSaveOrOpenBlob(newBlob);
-          return;
-        }
+    });
+    const blob = await response.blob();
+    var newBlob = new Blob([blob], { type: "application/zip" });
+    // IE doesn't allow using a blob object directly as link href
+    // instead it is necessary to use msSaveOrOpenBlob
+    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+      window.navigator.msSaveOrOpenBlob(newBlob);
+      return;
+    }
 
-        // For other browsers:
-        // Create a link pointing to the ObjectURL containing the blob.
-        const data = window.URL.createObjectURL(newBlob);
-        var link = document.createElement("a");
-        link.href = data;
-        link.setAttribute("type", "hidden");
-        link.download = "elogy_logbook_" + this.state.logbook.id + ".zip";
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(function() {
-          // For Firefox it is necessary to delay revoking the ObjectURL
-          window.URL.revokeObjectURL(data);
-          link.remove();
-        }, 1000);
-        this.setState({ downloading: false });
-      });
+    // For other browsers:
+    // Create a link pointing to the ObjectURL containing the blob.
+    const data = window.URL.createObjectURL(newBlob);
+    var link = document.createElement("a");
+    link.href = data;
+    link.setAttribute("type", "hidden");
+    link.download = "elogy_logbook_" + this.state.logbook.id + ".zip";
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(function() {
+      // For Firefox it is necessary to delay revoking the ObjectURL
+      window.URL.revokeObjectURL(data);
+      link.remove();
+    }, 1000);
+    this.setState({ downloading: false });
   }
 
   // Fetch entries
-  fetch(logbookId, search, attributeFilters, sortBy, offset, n) {
-    // build a nice query string with the query
-    // we'll start with the parameters in the browser URL
+  async fetch(logbookId, search, attributeFilters, sortBy, offset, n) {
     const query = search ? parseQuery(search) : {};
     query["n"] = n || query["n"] || 50;
     query["offset"] = offset || 0;
@@ -95,31 +92,45 @@ class Logbook extends React.Component {
       ""}&sort_by=${sortBy}&sort_by_timestamp=${sortByTimestamp}`;
 
     this.setState({ loading: true });
-    fetch(url, {
+    const response = await fetch(url, {
       headers: { Accept: "application/json" }
-    })
-      .then(response => response.json())
-      .then(json => {
-        this.setState({ loading: false });
-        if (offset) {
-          // append the new entries
-          this.setState(
-            update(this.state, { entries: { $push: json.entries } })
-          );
-        } else {
-          // replace entries
-          this.setState(json);
-        }
+    });
+    if (!response.ok) {
+      switch (response.status) {
+        case 401:
+          this.setState({
+            loading: false,
+            loadError: "You are not authorized to view this logbook"
+          });
+          break;
+        default:
+          this.setState({
+            loading: false,
+            loadError:
+              "Unable to load logbook, the server responsed with code " +
+              response.status
+          });
+      }
+      return;
+    }
+    const json = await response.json();
+    this.setState({ loading: false, loadError: "" });
+    if (offset) {
+      // append the new entries
+      this.setState(update(this.state, { entries: { $push: json.entries } }));
+    } else {
+      // replace entries
+      this.setState(json);
+    }
 
-        // If we get fewer than the maximum page size, we
-        // know the server does not have any more
-        // entries. This is a little primitive, but it
-        // turns out it's not so easy to just get the
-        // total number of entries from the db. Something
-        // to look further into sometime.
-        const moreEntries = json.entries.length >= query["n"];
-        this.setState({ moreEntries });
-      });
+    // If we get fewer than the maximum page size, we
+    // know the server does not have any more
+    // entries. This is a little primitive, but it
+    // turns out it's not so easy to just get the
+    // total number of entries from the db. Something
+    // to look further into sometime.
+    const moreEntries = json.entries.length >= query["n"];
+    this.setState({ moreEntries });
   }
 
   UNSAFE_componentWillReceiveProps(props) {
@@ -128,8 +139,8 @@ class Logbook extends React.Component {
     this.setState({ sortBy });
   }
 
-  UNSAFE_componentWillMount() {
-    this.fetch(
+  async UNSAFE_componentWillMount() {
+    await this.fetch(
       this.props.match.params.logbookId,
       this.props.location.search,
       this.state.attributeFilters,
@@ -137,7 +148,7 @@ class Logbook extends React.Component {
     );
   }
 
-  UNSAFE_componentWillUpdate(newProps, newState) {
+  async UNSAFE_componentWillUpdate(newProps, newState) {
     // if needed, we fetch info from the server
     if (
       newProps.match.params.logbookId !== this.props.match.params.logbookId ||
@@ -145,7 +156,7 @@ class Logbook extends React.Component {
       newState.attributeFilters !== this.state.attributeFilters ||
       newState.sortBy !== this.state.sortBy
     ) {
-      this.fetch(
+      await this.fetch(
         newProps.match.params.logbookId,
         newProps.location.search,
         newState.attributeFilters,
@@ -168,9 +179,9 @@ class Logbook extends React.Component {
     this.props.eventbus.unsubscribe("logbook.reload", this._reload);
   }
 
-  reload(logbookId) {
+  async reload(logbookId) {
     // only need to refresh if we're actually visiting the given logbook
-    this.fetch(
+    await this.fetch(
       this.props.match.params.logbookId,
       this.props.location.search,
       this.state.attributeFilters,
@@ -181,11 +192,14 @@ class Logbook extends React.Component {
   componentDidUpdate({ match }) {
     // set the browser title
     document.title = this.state.logbook.name
-      ? `${this.state.logbook.name}`
+      ? `Elogy | ${this.state.logbook.name}`
       : "Elogy";
     // make sure the entry list is scrolled to the top
     if (match.params.logbookId !== this.props.match.params.logbookId)
+    try{
       findDOMNode(this.refs.entries).scrollIntoView();
+    }catch(e){}
+      
   }
 
   onChangeAttributeFilter(attribute, event) {
@@ -207,16 +221,14 @@ class Logbook extends React.Component {
     }
   }
 
-  onLoadMore() {
-    this.fetch(
+  async onLoadMore() {
+    await this.fetch(
       this.props.match.params.logbookId,
       this.props.location.search,
       this.state.attributeFilters,
       this.state.sortBy,
       this.state.entries.length
     );
-
-    /*         this.fetchMoreEntries();*/
   }
 
   onSetSortBy(sortBy) {
@@ -228,8 +240,13 @@ class Logbook extends React.Component {
   }
 
   render() {
-    const { logbook, downloading } = this.state,
-      entryId = this.props.match.params.entryId
+    const { logbook, downloading, loadError } = this.state;
+    if (loadError) {
+      return <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
+        {this.state.loadError}
+      </div>
+    }
+    const entryId = this.props.match.params.entryId
         ? parseInt(this.props.match.params.entryId, 10)
         : null,
       query = parseQuery(this.props.location.search),
@@ -281,7 +298,6 @@ class Logbook extends React.Component {
         </button>
         <header>
           <span className="name">
-            {/* <i className="fa fa-book" /> */}
             {logbook.id === 0 ? "[All logbooks]" : logbook.name}
           </span>
           <div className="commands">
@@ -294,17 +310,17 @@ class Logbook extends React.Component {
             {logbook.id ? (
               <span>
                 <div className="entry">
-                    <Link
+                  <Link
                     className="btn btn-link"
                     role="button"
-                      to={{
-                        pathname: `/logbooks/${logbook.id}/entries/new`,
-                        search: window.location.search
-                      }}
-                      title={`Create a new entry in the logbook '${logbook.name}'`}
-                    >
-                      New entry
-                    </Link>
+                    to={{
+                      pathname: `/logbooks/${logbook.id}/entries/new`,
+                      search: window.location.search
+                    }}
+                    title={`Create a new entry in the logbook '${logbook.name}'`}
+                  >
+                    New entry
+                  </Link>
                 </div>
                 <Link
                   className="btn btn-link"
