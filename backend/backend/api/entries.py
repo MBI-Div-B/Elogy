@@ -11,7 +11,7 @@ from ..attachments import handle_img_tags
 from ..export import export_entry_as_html, export_logbook_as_html
 from ..actions import new_entry, edit_entry
 from . import fields, send_signal
-from ..utils import has_access
+from ..has_access import has_access
 
 
 entry_args = {

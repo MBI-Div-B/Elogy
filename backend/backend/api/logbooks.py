@@ -5,7 +5,7 @@ from webargs.flaskparser import use_args
 from ..db import Logbook
 from ..actions import new_logbook, edit_logbook
 from . import fields, send_signal
-from ..utils import has_access
+from ..has_access import has_access
 import sys
 
 

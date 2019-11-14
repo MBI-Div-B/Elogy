@@ -102,15 +102,12 @@ class Elogy extends React.Component {
       hideLogbookTree: false,
       hideLogbook: false,
       userCredentials: {},
-      loggedIn: false,
+      loggedIn: false
     };
     this._hideLogbookTree = this._hideLogbookTree.bind(this);
     this._hideLogbook = this._hideLogbook.bind(this);
     this.onLogin = this.onLogin.bind(this);
     this.onLogout = this.onLogout.bind(this);
-
-    console.log("REACT_APP_JWT_AUTH")
-    console.log(process.env.REACT_APP_JWT_AUTH)
   }
 
   async componentDidMount() {
@@ -119,24 +116,22 @@ class Elogy extends React.Component {
     const cookies = new Cookies();
     const jwt = cookies.get("jwt");
     if (jwt) {
-      try{
-        const decoded  = JSON.parse(atob(jwt.split('.')[1]))
+      try {
+        const decoded = JSON.parse(atob(jwt.split(".")[1]));
         if (decoded) {
           const loggedIn = new Date().getTime() * 0.001 < decoded.exp;
-          if (loggedIn){
-            this.setState({ userCredentials: decoded, loggedIn});
-          }else{
-            this.setState({ userCredentials: {}, loggedIn});
+          if (loggedIn) {
+            this.setState({ userCredentials: decoded, loggedIn });
+          } else {
+            this.setState({ userCredentials: {}, loggedIn });
           }
-          
         }
-      }catch(err){
-        console.log("Invalid jwt token")
-        this.setState({ userCredentials: {}, loggedIn: false})
+      } catch (err) {
+        console.log("Invalid jwt token");
+        this.setState({ userCredentials: {}, loggedIn: false });
       }
-      
-    }else{
-      this.setState({ userCredentials: {}, loggedIn: false})
+    } else {
+      this.setState({ userCredentials: {}, loggedIn: false });
     }
   }
 
@@ -161,13 +156,16 @@ class Elogy extends React.Component {
   onLogout() {
     const cookies = new Cookies();
     cookies.remove("jwt", { path: "/" });
-    this.setState({ userCredentials: {}, loggedIn: false});
+    this.setState({ userCredentials: {}, loggedIn: false });
   }
   render() {
     const { userCredentials, loggedIn } = this.state;
-    const userGroups = userCredentials && loggedIn ? userCredentials.groups : [];
-    const loggedInUser = userCredentials && loggedIn ? userCredentials.name : "";
-    const loggedInUsername = userCredentials && loggedIn ? userCredentials.username : "";
+    const userGroups =
+      userCredentials && loggedIn ? userCredentials.groups : [];
+    const loggedInUser =
+      userCredentials && loggedIn ? userCredentials.name : "";
+    const loggedInUsername =
+      userCredentials && loggedIn ? userCredentials.username : "";
     return (
       /* Set up a browser router that will render the correct component
        in the right places, all depending on the current URL.  */
@@ -176,11 +174,11 @@ class Elogy extends React.Component {
         <div id="app">
           {!this.state.hideLogbookTree ? (
             <div id="logbooks">
-              {process.env.REACT_APP_JWT_AUTH && <Login
+              <Login
                 loggedInUser={loggedInUser}
                 onLogin={this.onLogin}
                 onLogout={this.onLogout}
-              ></Login>}
+              ></Login>
               <Switch>
                 <Route
                   path="/logbooks/:logbookId"
@@ -239,11 +237,25 @@ class Elogy extends React.Component {
 
               <Route
                 path="/logbooks/new"
-                render={props => <LogbookEditor userGroups={userGroups} loggedInUsername={loggedInUsername} eventbus={eventbus} {...props}/>}
+                render={props => (
+                  <LogbookEditor
+                    userGroups={userGroups}
+                    loggedInUsername={loggedInUsername}
+                    eventbus={eventbus}
+                    {...props}
+                  />
+                )}
               />
               <Route
                 path="/logbooks/:logbookId/:command"
-                render={props => <LogbookEditor userGroups={userGroups} loggedInUsername={loggedInUsername} eventbus={eventbus} {...props}/>}
+                render={props => (
+                  <LogbookEditor
+                    userGroups={userGroups}
+                    loggedInUsername={loggedInUsername}
+                    eventbus={eventbus}
+                    {...props}
+                  />
+                )}
               />
 
               <Route path="/logbooks/:logbookId" component={NoEntry} />
