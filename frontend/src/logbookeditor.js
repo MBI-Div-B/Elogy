@@ -108,13 +108,19 @@ class LogbookEditorBase extends React.Component {
   changeName(event) {
     this.setState({ name: event.target.value });
   }
-  createUserGroupWidget(userGroups, selectedValue, owner, onChange) {
+  createUserGroupWidget(userGroups, selectedValue, loggedInUsername, isNewLogbook, onChange) {
     if (!userGroups || userGroups.length === 0) {
       return null;
     }
-    //only expose this widget to the logbook owner
-    if (!owner || owner !== this.state.logbook.owner){
-      return null;
+    //If new logbook, show widget if logged in
+    if (isNewLogbook){
+      if (!loggedInUsername){
+        return null;
+      }
+    }else{//if existing logbook, show widget if logged in user is the owner
+      if (!loggedInUsername || loggedInUsername !== this.state.logbook.owner){
+        return null;
+      }
     }
     return (
       <React.Fragment>
@@ -430,7 +436,8 @@ class LogbookEditorNew extends LogbookEditorBase {
           {this.createUserGroupWidget(
             userGroups,
             this.state.user_group,
-            this.state.loggedInUsername,
+            this.props.loggedInUsername,
+            true,
             event => this.setState({ user_group: event.target.value })
           )}
           <div className="editor-subtitle">Description</div>
@@ -634,7 +641,7 @@ class LogbookEditorEdit extends LogbookEditorBase {
             value={this.state.name}
             onChange={this.changeName.bind(this)}
           />
-          {this.createUserGroupWidget(userGroups, this.state.user_group, this.props.loggedInUsername, event =>
+          {this.createUserGroupWidget(userGroups, this.state.user_group, this.props.loggedInUsername, false, event =>
             this.setState({ user_group: event.target.value })
           )}
           <div className="editor-subtitle">Description</div>
