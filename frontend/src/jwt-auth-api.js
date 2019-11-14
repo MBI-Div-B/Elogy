@@ -1,6 +1,5 @@
 export async function login(username, password) {
   try {
-    console.log(process.env.REACT_APP_JWT_AUTH)
     const resp = await fetch(process.env.REACT_APP_JWT_AUTH, {
       method: "POST",
       headers: {
