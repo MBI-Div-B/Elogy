@@ -10,13 +10,14 @@
     "immutability-helper": "2.2.0",
     "isomorphic-fetch": "2.2.1",
     "mark.js": "^8.11.1",
-    "react": "15.5.4",
+    "react": "^16.11.0",
     "react-bootstrap": "^1.0.0-beta.14",
-    "react-dom": "15.5.4",
+    "react-dom": "^16.11.0",
     "react-dropzone": "3.13.0",
-    "react-lazy-load": "3.0.12",
-    "react-router-dom": "4.1.1",
-    "react-select": "1.0.0-rc.5"
+    "react-lazy-load": "^3.0.13",
+    "react-router-dom": "^5.1.2",
+    "react-select": "1.0.0-rc.5",
+    "universal-cookie": "^4.0.2"
   },
   "devDependencies": {
     "react-scripts": "0.9.5"

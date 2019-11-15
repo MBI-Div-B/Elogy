@@ -1,10 +1,12 @@
-from flask_restful import Resource, marshal_with
+from flask_restful import Resource, marshal_with, abort
+from flask import request
 from webargs.fields import Integer, Str, Boolean, Dict, List, Nested
 from webargs.flaskparser import use_args
-
 from ..db import Logbook
 from ..actions import new_logbook, edit_logbook
 from . import fields, send_signal
+from ..authentication import has_access
+import sys
 
 
 logbook_args = {
@@ -24,7 +26,9 @@ logbook_args = {
         "options": List(Str(), missing=None)
     })),
     "metadata": Dict(),
-    "archived": Boolean(missing=False)
+    "archived": Boolean(missing=False),
+    "user_group": Str(),
+    "owner": Str(),
 }
 
 
@@ -34,12 +38,11 @@ class LogbooksResource(Resource):
 
     @use_args({"parent": Integer()})
     @marshal_with(fields.logbook, envelope="logbook")
-    def get(self, args, logbook_id=None, revision_n=None):
-
-        "Fetch a given logbook"
-
+    def get(self, args, logbook_id=None, revision_n=None, jwt=""):
         if logbook_id:
             logbook = Logbook.get(Logbook.id == logbook_id)
+            if not has_access(user_group=logbook.user_group):
+                abort(401, message=("You don't have access to this logbook"))
             if revision_n is not None:
                 return logbook.get_revision(revision_n)
             return logbook
@@ -48,7 +51,10 @@ class LogbooksResource(Resource):
         # global list of top-level (no parent) logbooks
         parent_id = args.get("parent")
         if parent_id:
-            return Logbook.get(Logbook.id == parent_id)
+            tmp = Logbook.get(Logbook.id == parent_id)
+            if not has_access(tmp.user_group):
+                abort(401, message=("You don't have access to this logbook"))
+            return tmp
         children = (Logbook.select()
                     .where(Logbook.parent == None))
         return dict(children=children)
@@ -57,7 +63,6 @@ class LogbooksResource(Resource):
     @use_args(logbook_args)
     @marshal_with(fields.logbook, envelope="logbook")
     def post(self, args, logbook_id=None):
-
         "Create a new logbook"
 
         logbook = Logbook(name=args["name"],
@@ -66,7 +71,9 @@ class LogbooksResource(Resource):
                           template=args.get("template"),
                           attributes=args.get("attributes", []),
                           metadata=args.get("metadata", {}),
-                          archived=args["archived"])
+                          archived=args["archived"],
+                          user_group=args["user_group"],
+                          owner=args["owner"])
         if logbook_id:
             parent = Logbook.get(Logbook.id == logbook_id)
             logbook.parent = parent
@@ -77,7 +84,6 @@ class LogbooksResource(Resource):
     @use_args(logbook_args)
     @marshal_with(fields.logbook, envelope="logbook")
     def put(self, args, logbook_id):
-
         "Update an existing logbook"
 
         if not args.get("parent_id"):

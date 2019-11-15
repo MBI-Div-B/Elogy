@@ -99,6 +99,8 @@ class Logbook(Model):
     attributes = JSONField(default=[])
     metadata = JSONField(default={})
     archived = BooleanField(default=False)
+    user_group = CharField()
+    owner = CharField()
 
     def __str__(self):
         return "[{}] {}".format(self.id, self.name)

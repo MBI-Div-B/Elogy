@@ -3,8 +3,9 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Link } from "react-router-dom";
-
+import Cookies from "universal-cookie";
 import Entry from "./entry.js";
+import Login from "./login.js";
 import EntryEditor from "./entryeditor.js";
 import Logbook from "./logbook.js";
 import LogbookEditor from "./logbookeditor.js";
@@ -21,11 +22,10 @@ import "./app.css";
 const eventbus = new EventBus();
 
 // wrap the relevant component with the eventbus as a prop
-// This is the only (?) way to send props to a route component
+
 const LogbookTreeWithEventbus = withProps(LogbookTree, { eventbus });
 const LogbookWithEventbus = withProps(Logbook, { eventbus });
 const EntryEditorWithEventbus = withProps(EntryEditor, { eventbus });
-const LogbookEditorWithEventbus = withProps(LogbookEditor, { eventbus });
 
 // dummy components for when no logbook is selected
 class NoLogbook extends React.Component {
@@ -101,15 +101,38 @@ class Elogy extends React.Component {
     this.state = {
       hideLogbookTree: false,
       hideLogbook: false,
-      jwt: {},
+      userCredentials: {},
+      loggedIn: false
     };
     this._hideLogbookTree = this._hideLogbookTree.bind(this);
     this._hideLogbook = this._hideLogbook.bind(this);
+    this.onLogin = this.onLogin.bind(this);
+    this.onLogout = this.onLogout.bind(this);
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     eventbus.subscribe("logbooktree.hide", this._hideLogbookTree);
     eventbus.subscribe("logbook.hide", this._hideLogbook);
+    const cookies = new Cookies();
+    const jwt = cookies.get("jwt");
+    if (jwt) {
+      try {
+        const decoded = JSON.parse(atob(jwt.split(".")[1]));
+        if (decoded) {
+          const loggedIn = new Date().getTime() * 0.001 < decoded.exp;
+          if (loggedIn) {
+            this.setState({ userCredentials: decoded, loggedIn });
+          } else {
+            this.setState({ userCredentials: {}, loggedIn });
+          }
+        }
+      } catch (err) {
+        console.log("Invalid jwt token");
+        this.setState({ userCredentials: {}, loggedIn: false });
+      }
+    } else {
+      this.setState({ userCredentials: {}, loggedIn: false });
+    }
   }
 
   componentWillUnmount() {
@@ -125,7 +148,24 @@ class Elogy extends React.Component {
     this.setState({ hideLogbook: hide });
   }
 
+  onLogin(userCredentials) {
+    const cookies = new Cookies();
+    cookies.set("jwt", userCredentials.jwt, { path: "/" });
+    this.setState({ userCredentials, loggedIn: true });
+  }
+  onLogout() {
+    const cookies = new Cookies();
+    cookies.remove("jwt", { path: "/" });
+    this.setState({ userCredentials: {}, loggedIn: false });
+  }
   render() {
+    const { userCredentials, loggedIn } = this.state;
+    const userGroups =
+      userCredentials && loggedIn ? userCredentials.groups : [];
+    const loggedInUser =
+      userCredentials && loggedIn ? userCredentials.name : "";
+    const loggedInUsername =
+      userCredentials && loggedIn ? userCredentials.username : "";
     return (
       /* Set up a browser router that will render the correct component
        in the right places, all depending on the current URL.  */
@@ -134,7 +174,11 @@ class Elogy extends React.Component {
         <div id="app">
           {!this.state.hideLogbookTree ? (
             <div id="logbooks">
-                {/* <LoginPanel></LoginPanel> */}
+              <Login
+                loggedInUser={loggedInUser}
+                onLogin={this.onLogin}
+                onLogout={this.onLogout}
+              ></Login>
               <Switch>
                 <Route
                   path="/logbooks/:logbookId"
@@ -193,11 +237,25 @@ class Elogy extends React.Component {
 
               <Route
                 path="/logbooks/new"
-                component={LogbookEditorWithEventbus}
+                render={props => (
+                  <LogbookEditor
+                    userGroups={userGroups}
+                    loggedInUsername={loggedInUsername}
+                    eventbus={eventbus}
+                    {...props}
+                  />
+                )}
               />
               <Route
                 path="/logbooks/:logbookId/:command"
-                component={LogbookEditorWithEventbus}
+                render={props => (
+                  <LogbookEditor
+                    userGroups={userGroups}
+                    loggedInUsername={loggedInUsername}
+                    eventbus={eventbus}
+                    {...props}
+                  />
+                )}
               />
 
               <Route path="/logbooks/:logbookId" component={NoEntry} />

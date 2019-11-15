@@ -34,12 +34,12 @@ class LogbookAttributeEditor extends React.PureComponent {
 
   render() {
     return (
-      <div className="attribute" style={{display: "inline-block"}}>
+      <div className="attribute" style={{ display: "inline-block" }}>
         <label>
           <input
             className="form-control form-control-sm"
             type="text"
-            ref="name"
+            // ref="name"
             value={this.props.name}
             disabled={this.props.existingAttribute}
             onChange={this.onChangeName.bind(this)}
@@ -50,7 +50,7 @@ class LogbookAttributeEditor extends React.PureComponent {
           className="form-control form-control-sm inline-block"
           style={{ width: "10em" }}
           name="type"
-          ref="type"
+          // ref="type"
           value={this.props.type}
           disabled={this.props.existingAttribute}
           onChange={this.onChangeType.bind(this)}
@@ -64,7 +64,7 @@ class LogbookAttributeEditor extends React.PureComponent {
         <label>
           <input
             type="checkbox"
-            ref="required"
+            // ref="required"
             checked={this.props.required}
             onChange={this.onChangeRequired.bind(this)}
           />
@@ -81,9 +81,9 @@ class LogbookAttributeEditor extends React.PureComponent {
           Options:
           <textarea
             rows="3"
-            ref="options"
+            // ref="options"
             title="Choices available for the attribute (one per line)"
-            value={(this.props.options || []).join("\n")}
+            value={(this.props.options || []).join("\n") || ""}
             onChange={this.onChangeOptions.bind(this)}
           />
         </label>
@@ -99,7 +99,7 @@ class LogbookEditorBase extends React.Component {
        we're creating a new lognbook or editing an existing one. This
        cuts down on the amount of conditional logic.*/
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (this.props.match.params.logbookId > 0) {
       this.fetch();
     }
@@ -107,6 +107,40 @@ class LogbookEditorBase extends React.Component {
 
   changeName(event) {
     this.setState({ name: event.target.value });
+  }
+  createUserGroupWidget(userGroups, selectedValue, loggedInUsername, isNewLogbook, onChange) {
+    if (!userGroups || userGroups.length === 0) {
+      return null;
+    }
+    //If new logbook, show widget if logged in
+    if (isNewLogbook){
+      if (!loggedInUsername){
+        return null;
+      }
+    }else{//if existing logbook, show widget if logged in user is the owner
+      if (!loggedInUsername || loggedInUsername !== this.state.logbook.owner){
+        return null;
+      }
+    }
+    return (
+      <React.Fragment>
+        <div className="editor-subtitle">Visibility</div>
+        Make this logbook available to
+        <select
+          value={selectedValue}
+          onChange={onChange}
+          className="form-control form-control-sm inline-block ml-1"
+          style={{ width: "15em" }}
+        >
+          <option value="">Everyone</option>
+          {userGroups.map(group => (
+            <option key={group} value={group}>
+              {group}
+            </option>
+          ))}
+        </select>
+      </React.Fragment>
+    );
   }
 
   changeDescription(event) {
@@ -121,7 +155,7 @@ class LogbookEditorBase extends React.Component {
         logbook && logbook.attributes.some(({ name }) => name === attr.name);
 
       return (
-        <div className="attribute-panel">
+        <div className="attribute-panel" key={attr.name}>
           <div className="button-row">
             <button
               title="Remove this attribute"
@@ -265,25 +299,56 @@ class LogbookEditorNew extends LogbookEditorBase {
       metadata: {},
       attributes: [],
       parent: {},
-      error: null
+      user_group: "",
+      owner: "",
+      error: null,
+      loadError: "",
     };
   }
 
-  fetch() {
-    fetch(`/api/logbooks/${this.props.match.params.logbookId || 0}/`, {
+  async fetch() {
+    const response = await fetch(`/api/logbooks/${this.props.match.params.logbookId || 0}/`, {
       headers: { Accept: "application/json" }
     })
-      .then(response => response.json())
-      .then(json =>
-        this.setState({
-          parent: json.logbook,
-          attributes: json.logbook.attributes
-        })
-      );
+    if (!response.ok) {
+      switch (response.status) {
+        case 401:
+          this.setState({
+            loading: false,
+            loadError: "You are not authorized to view this logbook"
+          });
+          break;
+        default:
+          this.setState({
+            loading: false,
+            loadError:
+              "Unable to load logbook, the server responsed with code " +
+              response.status
+          });
+      }
+      return;
+    }
+    const json = await response.json();
+    this.setState({
+      loadError: "",
+      parent: json.logbook,
+      attributes: json.logbook.attributes
+    })
+
   }
 
   onSubmit(history) {
     this.submitted = true;
+    const {
+      parent,
+      name,
+      newDescription,
+      description,
+      attributes,
+      newTemplate,
+      template,
+      user_group
+    } = this.state;
     // creating a new logbook
     // either as a new toplevel, or as a child of the given logbook
     const url = this.props.match.params.logbookId
@@ -295,12 +360,14 @@ class LogbookEditorNew extends LogbookEditorBase {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        parent_id: this.state.parent ? this.state.parent.id : null,
-        name: this.state.name,
-        description: this.state.newDescription || this.state.description,
-        attributes: this.state.attributes,
-        template: this.state.newTemplate || this.state.template,
-        template_content_type: "text/html"
+        parent_id: parent ? parent.id : null,
+        name,
+        description: newDescription || description,
+        attributes: attributes,
+        template: newTemplate || template,
+        template_content_type: "text/html",
+        user_group,
+        owner: this.props.loggedInUsername,
       })
     })
       .then(response => {
@@ -335,14 +402,26 @@ class LogbookEditorNew extends LogbookEditorBase {
   }
 
   innerRender({ history }) {
+    if (this.state.loadError) {
+      return (
+        <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
+          {this.state.loadError}
+        </div>
+      );
+    }
+    const userGroups = this.props.userGroups || [];
     return (
       <div id="logbookeditor">
         <Prompt message={this.getPromptMessage.bind(this)} />
 
         <header>
-          {this.state.parent.id
-            ? <div>New logbook in <b>{this.state.parent.name}</b></div>
-            : <div>New top level logbook</div>}
+          {this.state.parent.id ? (
+            <div>
+              New logbook in <b>{this.state.parent.name}</b>
+            </div>
+          ) : (
+            <div>New top level logbook</div>
+          )}
         </header>
 
         <form>
@@ -354,12 +433,19 @@ class LogbookEditorNew extends LogbookEditorBase {
             value={this.state.name}
             onChange={this.changeName.bind(this)}
           />
+          {this.createUserGroupWidget(
+            userGroups,
+            this.state.user_group,
+            this.props.loggedInUsername,
+            true,
+            event => this.setState({ user_group: event.target.value })
+          )}
           <div className="editor-subtitle">Description</div>
           <textarea
             className="form-control form-control-sm"
             name="description"
             rows={5}
-            value={this.state.description}
+            value={this.state.description || ""}
             onChange={this.changeDescription.bind(this)}
           />
           <div className="editor-subtitle">Template</div>
@@ -372,11 +458,14 @@ class LogbookEditorNew extends LogbookEditorBase {
           </div>
           <div className="editor-subtitle">
             Attributes
-          <button
+            <button
               title="Add a new attribute"
               type="button"
               className="btn btn-link"
-              onClick={this.insertAttribute.bind(this, this.state.attributes.length)}
+              onClick={this.insertAttribute.bind(
+                this,
+                this.state.attributes.length
+              )}
             >
               Add
             </button>
@@ -409,41 +498,72 @@ class LogbookEditorEdit extends LogbookEditorBase {
       attributes: [],
       logbook: {},
       archived: false,
-      error: null
+      user_group: "",
+      error: null,
+      loadError: "",
     };
   }
 
-  fetch() {
-    fetch(`/api/logbooks/${this.props.match.params.logbookId || 0}/`, {
+  async fetch() {
+    const response = await fetch(`/api/logbooks/${this.props.match.params.logbookId || 0}/`, {
       headers: { Accept: "application/json" }
     })
-      .then(response => response.json())
-      .then(json =>
-        this.setState({
-          logbook: json.logbook,
-          ...json.logbook
-        })
-      );
+    if (!response.ok) {
+      switch (response.status) {
+        case 401:
+          this.setState({
+            loading: false,
+            loadError: "You are not authorized to view this logbook"
+          });
+          break;
+        default:
+          this.setState({
+            loading: false,
+            loadError:
+              "Unable to load logbook, the server responsed with code " +
+              response.status
+          });
+      }
+      return;
+    }
+    const json = await response.json()
+    this.setState({
+      loadError: "",
+      logbook: json.logbook,
+      ...json.logbook
+    })
   }
 
   onSubmit(history) {
     this.submitted = true;
     const parentId =
       this.state.parentId || (this.state.parent ? this.state.parent.id : null);
+
+    const {
+      id,
+      name,
+      description,
+      attributes,
+      newTemplate,
+      template,
+      user_group,
+      archived,
+    } = this.state;
     fetch(`/api/logbooks/${this.state.id}/`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        id: this.state.id,
+        id,
         parent_id: parentId !== 0 ? parentId : null,
-        name: this.state.name,
-        description: this.state.description,
-        attributes: this.state.attributes,
-        archived: this.state.archived,
-        template: this.state.newTemplate || this.state.template,
-        template_content_type: "text/html"
+        name,
+        description,
+        attributes,
+        archived,
+        template: newTemplate || template,
+        template_content_type: "text/html",
+        user_group,
       })
     })
       .then(response => {
@@ -486,6 +606,14 @@ class LogbookEditorEdit extends LogbookEditorBase {
   }
 
   innerRender({ history }) {
+    if (this.state.loadError) {
+      return (
+        <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
+          {this.state.loadError}
+        </div>
+      );
+    }
+    const userGroups = this.props.userGroups || [];
     const parentId =
       this.state.parentId || (this.state.parent ? this.state.parent.id : 0);
 
@@ -513,12 +641,15 @@ class LogbookEditorEdit extends LogbookEditorBase {
             value={this.state.name}
             onChange={this.changeName.bind(this)}
           />
+          {this.createUserGroupWidget(userGroups, this.state.user_group, this.props.loggedInUsername, false, event =>
+            this.setState({ user_group: event.target.value })
+          )}
           <div className="editor-subtitle">Description</div>
           <textarea
             className="form-control form-control-sm"
             name="description"
             rows={5}
-            value={this.state.description}
+            value={this.state.description || ""}
             onChange={this.changeDescription.bind(this)}
           />
           <div className="editor-subtitle">Template</div>
@@ -531,15 +662,18 @@ class LogbookEditorEdit extends LogbookEditorBase {
           </div>
           <div className="editor-subtitle">
             Attributes
-          <button
+            <button
               title="Add a new attribute"
               type="button"
               className="btn btn-link"
-              onClick={this.insertAttribute.bind(this, this.state.attributes.length)}
+              onClick={this.insertAttribute.bind(
+                this,
+                this.state.attributes.length
+              )}
             >
               Add
             </button>
-            </div>
+          </div>
           <div className="attributes">{this.getAttributes()}</div>
         </form>
 

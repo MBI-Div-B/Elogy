@@ -11,6 +11,7 @@ from ..attachments import handle_img_tags
 from ..export import export_entry_as_html, export_logbook_as_html
 from ..actions import new_entry, edit_entry
 from . import fields, send_signal
+from ..authentication import has_access
 
 
 entry_args = {
@@ -39,22 +40,32 @@ entry_args = {
 class EntryDownloadResource(Resource):
 
     "Handle request for an entry download"
-    
+
     @use_args({"entry_id": Integer(allow_none=True), "logbook_id": Integer(allow_none=True), "include_attachments": Boolean(missing=False)})
     def get(self, args):
-        html  = ""
+        html = ""
         if "entry_id" in args:
             try:
-                html = export_entry_as_html(args["entry_id"], args["include_attachments"])
-            except Exception:
-                abort(500, message=(
-                "The entry could not be exported"))
+                html = export_entry_as_html(
+                    args["entry_id"], args["include_attachments"])
+            except Exception as e:
+                if str(e) is "401":
+                    abort(401, message=(
+                        "You are not authorized to view this entry"))
+                else:
+                    abort(500, message=(
+                        "The entry could not be exported"))
         if "logbook_id" in args:
             try:
-                html = export_logbook_as_html(args["logbook_id"], args["include_attachments"])
-            except Exception:
-                abort(500, message=(
-                "The logbook could not be exported"))
+                html = export_logbook_as_html(
+                    args["logbook_id"], args["include_attachments"])
+            except Exception as e:
+                if str(e) is "401":
+                    abort(401, message=(
+                        "You are not authorized to view this logbook"))
+                else:
+                    abort(500, message=(
+                        "The logbook could not be exported"))
 
         return send_file(html, mimetype="application/zip", as_attachment=True, attachment_filename=(html))
 
@@ -67,6 +78,8 @@ class EntryResource(Resource):
     @marshal_with(fields.entry_full, envelope="entry")
     def get(self, args, entry_id, logbook_id=None, revision_n=None):
         entry = Entry.get(Entry.id == entry_id)
+        if not has_access(logbook_id=entry.logbook_id):
+            abort(401, message=("You don't have access to this logbook"))
         if revision_n is not None:
             return entry.get_revision(revision_n)
         if args["thread"]:
@@ -79,7 +92,8 @@ class EntryResource(Resource):
     def post(self, args, logbook_id, entry_id=None):
         "Creating a new entry"
         logbook = Logbook.get(Logbook.id == logbook_id)
-        # TODO: clean up
+        if not has_access(user_group=logbook.user_group):
+            abort(401, message=("You don't have access to this logbook"))
         if entry_id is not None:
             # we're creating a followup to an existing entry
             args["follows"] = entry_id
@@ -116,6 +130,8 @@ class EntryResource(Resource):
         "update entry"
         entry_id = entry_id or args["id"]
         entry = Entry.get(Entry.id == entry_id)
+        if not has_access(logbook_id=entry.logbook_id):
+            abort(401, message=("You don't have access to this logbook"))
         # to prevent overwiting someone else's changes we require the
         # client to supply the "revision_n" field of the entry they
         # are editing. If this does not match the current entry in the
@@ -186,6 +202,9 @@ class EntriesResource(Resource):
         if logbook_id:
             # restrict search to the given logbook and its descendants
             logbook = Logbook.get(Logbook.id == logbook_id)
+            if not has_access(user_group=logbook.user_group):
+                abort(401, message=("You don't have access to this logbook"))
+
             search_args = dict(child_logbooks=not args.get("ignore_children"),
                                title_filter=args.get("title"),
                                content_filter=args.get("content"),

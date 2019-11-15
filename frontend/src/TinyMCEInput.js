@@ -126,7 +126,7 @@ var TinyMCEInput = createReactClass({
         this.initTimeout = undefined;
         this.initStartTime = undefined;
     },
-    componentWillReceiveProps: function(nextProps) {
+    UNSAFE_componentWillReceiveProps: function(nextProps) {
         if (nextProps.value !== this.state.value) {
             var editor = tinymce.get(this.state.id);
             if (editor) {

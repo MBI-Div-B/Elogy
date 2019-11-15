@@ -194,17 +194,13 @@
     position: relative;
 }
 
-#entryeditor button.delete {
-    background: red;
-    color: white;
-    position: absolute;
-}
-
 #entryeditor span.error {
     width: 100%;
     text-align: center;
-    background: red;
-    color: white;
+    background: #f9d3d3;
+    color: #751616;
+    padding: 0.1em 1em;
+    border-radius: 0.2em;
 }
 
 #entryeditor span.locked-by-someone-else {

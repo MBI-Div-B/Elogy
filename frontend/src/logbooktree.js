@@ -36,18 +36,16 @@ class LogbookTreeNode extends React.Component {
                 <span>
                     <input
                         type="checkbox"
-                        checked={this.state.expanded}
+                        defaultChecked={this.state.expanded}
                         id={`check-${this.props.id}`}
                         onClick={this.toggle.bind(this)}
                     />
                     <label htmlFor={`check-${this.props.id}`} />
                 </span>
             ) : null;
-
         return (
             <li
                 key={this.props.id}
-                title={this.props.description || null}
                 className={
                     (this.props.selectedLogbookId === this.props.id
                         ? "selected "
@@ -57,12 +55,14 @@ class LogbookTreeNode extends React.Component {
             >
                 {expander}
                 <Link
+                title={this.props.description}
                     to={{
                         pathname: `/logbooks/${this.props.id}`,
                         search: window.location.search
                     }}
                 >
-                    {this.props.name}
+                    {this.props.name}{" "}
+                    {this.props.user_group && <i title={`Only visible to ${this.props.user_group}`} className="fa fa-lock" />}
                 </Link>
                 {children}
             </li>
@@ -93,7 +93,7 @@ class LogbookTree extends React.Component {
         this.props.eventbus.subscribe("logbook.reload", this._reload);
     }
 
-    componentWillReceiveProps({ location }) {
+    UNSAFE_componentWillReceiveProps({ location }) {
         const query = parseQuery(location.search);
         if ((query.parent || null) !== (this.state.parent || null))
             this.fetch(location.search);

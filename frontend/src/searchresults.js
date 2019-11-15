@@ -17,7 +17,7 @@ class SearchResults extends React.Component {
             .then(json => this.setState(json));
     }
 
-    componentWillUpdate(newProps) {
+    UNSAFE_componentWillUpdate(newProps) {
         if (newProps.location.search != this.state.search) {
             this.fetchSearchResults(
                 newProps.location,
