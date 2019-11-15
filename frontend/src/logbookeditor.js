@@ -41,6 +41,7 @@ class LogbookAttributeEditor extends React.PureComponent {
             type="text"
             // ref="name"
             value={this.props.name}
+            onFocus={event => event.target.select()}
             disabled={this.props.existingAttribute}
             onChange={this.onChangeName.bind(this)}
           />
@@ -155,7 +156,7 @@ class LogbookEditorBase extends React.Component {
         logbook && logbook.attributes.some(({ name }) => name === attr.name);
 
       return (
-        <div className="attribute-panel" key={attr.name}>
+        <div className="attribute-panel" key={i}>
           <div className="button-row">
             <button
               title="Remove this attribute"
