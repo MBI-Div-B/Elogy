@@ -12,6 +12,7 @@ from .api.errors import errors as api_errors
 from .api.logbooks import LogbooksResource, LogbookChangesResource
 from .api.entries import (EntryResource, EntriesResource, EntryDownloadResource,
                           EntryLockResource, EntryChangesResource)
+from .api.auth import AuthResource
 from .api.users import UsersResource
 from .api.attachments import AttachmentsResource
 from .db import setup_database
@@ -64,6 +65,7 @@ api.add_resource(LogbooksResource,
 api.add_resource(LogbookChangesResource,
                  "/logbooks/<int:logbook_id>/revisions/")
 
+api.add_resource(AuthResource, "/auth/")
 api.add_resource(EntryDownloadResource, "/download/")
 api.add_resource(EntriesResource,
                  "/logbooks/<int:logbook_id>/entries/")  # GET

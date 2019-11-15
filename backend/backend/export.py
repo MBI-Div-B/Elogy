@@ -1,6 +1,6 @@
 from tempfile import NamedTemporaryFile
 from .db import Entry, Logbook
-from .has_access import has_access
+from .authentication import has_access
 import sys
 import time
 import base64

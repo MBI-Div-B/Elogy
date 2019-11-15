@@ -1,6 +1,6 @@
 export async function login(username, password) {
   try {
-    const resp = await fetch("https://jwt-auth.maxiv.lu.se/v1/login", {
+    const resp = await fetch("/api/auth/", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -9,7 +9,6 @@ export async function login(username, password) {
       body: JSON.stringify({
         username: username,
         password: password,
-        includeDecoded: true
       })
     });
     if (!resp.ok) {

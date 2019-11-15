@@ -15,6 +15,7 @@ DATABASE = os.getenv('ELOGY_DATABASE', 'elogy.db')  # !!!Do not use /tmp for any
 SECRET = os.getenv('ELOGY_SECRET', 'MW3sr3ctkmRvagBE')  
 
 JWT_DECODE_URL = os.getenv('JWT_DECODE_URL', 'https://jwt-auth.maxiv.lu.se/v1/decode')  
+JWT_AUTH_URL = os.getenv('JWT_AUTH_URL', 'https://jwt-auth.maxiv.lu.se/v1/login')
 
 # The folder where all uploaded files will be stored.
 UPLOAD_FOLDER = os.getenv('ELOGY_UPLOAD_FOLDER', '/tmp/elogy')  # !!!Again, /tmp is a bad choice!!!
