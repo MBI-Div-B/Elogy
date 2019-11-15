@@ -2,6 +2,7 @@ from .db import Logbook
 import requests
 from flask import current_app
 from flask_restful import reqparse
+import sys
 
 def has_access(user_group="", logbook_id=None):
     """
