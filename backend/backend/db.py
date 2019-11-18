@@ -10,7 +10,7 @@ from peewee import (IntegerField, CharField, TextField, BooleanField,
                     DateTimeField, ForeignKeyField, sqlite3)
 from peewee import Model, DoesNotExist, Entity
 
-from .utils import CustomJSONEncoder
+from .utils import CustomJSONEncoder, get_user_groups
 
 
 # defer the actual db setup to later, when we have read the config
@@ -35,7 +35,6 @@ def setup_database(db_name, close=True):
     EntryChange.create_table(fail_silently=True)
     EntryLock.create_table(fail_silently=True)
     Attachment.create_table(fail_silently=True)
-    # print("\n".join(line[0] for line in db.execute_sql("pragma compile_options;")))
     if close:
         db.close()  # important
 
@@ -531,20 +530,6 @@ class Entry(Model):
             return EntryRevision(self.changes[version])
         raise(EntryChange.DoesNotExist)
 
-    # def get_old_version(self, revision_id):
-    #     revisions = (EntryChange.select()
-    #                  .where(EntryChange.entry == self
-    #                         and EntryChange.id >= revision_id)
-    #                  .order_by(EntryChange.id.desc()))
-    #     content = self.content
-    #     print(content)
-    #     print("---")
-    #     for revision in revisions:
-    #         print(revision.content)
-    #         if revision.content:
-    #             content = apply_patch(content, revision.content)
-    #     return content
-
     @property
     def stripped_content(self):
         return strip_tags(self.content)
@@ -593,6 +578,8 @@ class Entry(Model):
         # support recursive queries, which we need in order to search
         # through nested logbooks. Cleanup needed!
 
+        user_groups  = get_user_groups()
+        variables = []
         if author_filter:
             # extract the author names as a separate table, so that
             # they can be searched
@@ -636,6 +623,7 @@ class Entry(Model):
                     UNION ALL
                     SELECT logbook.id, logbook.parent_id FROM logbook,logbook1
                     WHERE logbook.parent_id=logbook1.id
+                    AND logbook.user_group in ({user_groups})
                 ),
                 -- recursively add all 'ancestor' logbooks (parent, grandparent, ...)
                 logbook2(id,parent_id) AS (
@@ -643,6 +631,7 @@ class Entry(Model):
                     UNION ALL
                     SELECT logbook.id, logbook.parent_id FROM logbook,logbook2
                     WHERE logbook2.parent_id=logbook.id
+                    AND logbook.user_group in ({user_groups})
                 )
                 SELECT entry.*{attributes}{metadata},
                     {attachment}
@@ -661,15 +650,20 @@ class Entry(Model):
                 {join_attachment}
                 LEFT JOIN entry AS followup ON entry.id == followup.follows_id
                 WHERE ((entry.logbook_id=logbook1.id)
-                       OR (entry.priority>100 AND entry.logbook_id=logbook2.id))
-                      AND NOT logbook.archived
+                    OR (entry.priority>100 AND entry.logbook_id=logbook2.id))
+                    AND NOT logbook.archived
+                    AND logbook.user_group in ({user_groups})
                 """.format(attachment=("attachment.path as attachment_path,"
                                        if attachment_filter else ""),
                            authors=authors, logbook=logbook.id,
                            attributes=attributes,
                            metadata=metadata,
+                           user_groups=",".join(['?']*len(user_groups)),
                            join_attachment=("JOIN attachment ON attachment.entry_id == entry.id"
                                             if attachment_filter else ""))
+                variables.extend(user_groups)
+                variables.extend(user_groups)
+                variables.extend(user_groups)
             else:
                 # In this case we're not searching recursively
                 query = (
@@ -712,19 +706,20 @@ class Entry(Model):
             JOIN logbook on logbook.id = entry.logbook_id
             LEFT JOIN entry AS followup ON entry.id == followup.follows_id
             WHERE NOT logbook.archived
+            AND logbook.user_group in ({user_groups})
             """.format(attributes=attributes,
                        metadata=metadata,
                        attachment=("path as attachment_path,"
                                    if attachment_filter else ""),
                        authors=authors,
+                       user_groups=",".join(['?']*len(user_groups)),
                        join_attachment=(
                            "JOIN attachment ON attachment.entry_id == entry.id"
                            if attachment_filter else ""))
+            variables.extend(user_groups)
 
         if not archived:
             query += " AND NOT entry.archived\n"
-
-        variables = []
 
         # if not followups:
         #     query += " AND entry.follows_id IS NULL"
@@ -769,6 +764,11 @@ class Entry(Model):
             if offset:
                 query += " OFFSET {}".format(offset)
         logging.debug("query=%r, variables=%r" % (query, variables))
+        # print("Query", file=sys.stdout)
+        # print(query, file=sys.stdout)
+        # print("variables", file=sys.stdout)
+        # print(variables, file=sys.stdout)
+         
         return Entry.raw(query, *variables)
 
     @classmethod
