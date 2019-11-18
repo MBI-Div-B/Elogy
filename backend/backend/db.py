@@ -623,7 +623,7 @@ class Entry(Model):
                     UNION ALL
                     SELECT logbook.id, logbook.parent_id FROM logbook,logbook1
                     WHERE logbook.parent_id=logbook1.id
-                    AND logbook.user_group in ({user_groups})
+                    AND (logbook.user_group = '' OR logbook.user_group in ({user_groups}))
                 ),
                 -- recursively add all 'ancestor' logbooks (parent, grandparent, ...)
                 logbook2(id,parent_id) AS (
@@ -631,7 +631,7 @@ class Entry(Model):
                     UNION ALL
                     SELECT logbook.id, logbook.parent_id FROM logbook,logbook2
                     WHERE logbook2.parent_id=logbook.id
-                    AND logbook.user_group in ({user_groups})
+                    AND (logbook.user_group = '' OR logbook.user_group in ({user_groups}))
                 )
                 SELECT entry.*{attributes}{metadata},
                     {attachment}
@@ -652,7 +652,7 @@ class Entry(Model):
                 WHERE ((entry.logbook_id=logbook1.id)
                     OR (entry.priority>100 AND entry.logbook_id=logbook2.id))
                     AND NOT logbook.archived
-                    AND logbook.user_group in ({user_groups})
+                    AND (logbook.user_group = '' OR logbook.user_group in ({user_groups}))
                 """.format(attachment=("attachment.path as attachment_path,"
                                        if attachment_filter else ""),
                            authors=authors, logbook=logbook.id,
@@ -706,7 +706,7 @@ class Entry(Model):
             JOIN logbook on logbook.id = entry.logbook_id
             LEFT JOIN entry AS followup ON entry.id == followup.follows_id
             WHERE NOT logbook.archived
-            AND logbook.user_group in ({user_groups})
+            AND (logbook.user_group = '' OR logbook.user_group in ({user_groups}))
             """.format(attributes=attributes,
                        metadata=metadata,
                        attachment=("path as attachment_path,"
@@ -764,10 +764,10 @@ class Entry(Model):
             if offset:
                 query += " OFFSET {}".format(offset)
         logging.debug("query=%r, variables=%r" % (query, variables))
-        # print("Query", file=sys.stdout)
-        # print(query, file=sys.stdout)
-        # print("variables", file=sys.stdout)
-        # print(variables, file=sys.stdout)
+        print("Query", file=sys.stdout)
+        print(query, file=sys.stdout)
+        print("variables", file=sys.stdout)
+        print(variables, file=sys.stdout)
          
         return Entry.raw(query, *variables)
 

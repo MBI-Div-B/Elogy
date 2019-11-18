@@ -285,7 +285,7 @@ class Entry extends React.Component {
       );
     }
     if (!(id && logbook)) {
-      return <div />; // placeholder
+      return <div />; // placeholder on no logbook
     }
 
     const query = parseQuery(this.props.location.search);

@@ -22,15 +22,15 @@ def get_user_groups(as_sql_list=False):
         jwt = args["jwt"]
         if not jwt:
             if as_sql_list:
-                return "('')"
-            return ['']
+                return "('')" 
+            return []
         r = requests.post(
             url=current_app.config["JWT_DECODE_URL"], data={"jwt": jwt})
 
         if r.status_code is not 200:
             if as_sql_list:
                 return "('')"
-            return ['']
+            return []
 
         data = r.json()
         if not as_sql_list:
@@ -39,7 +39,7 @@ def get_user_groups(as_sql_list=False):
     except Exception:
         if as_sql_list:
             return "('')"
-        return ['']
+        return []
     
 
 def request_wants_json():
