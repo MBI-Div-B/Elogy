@@ -1,12 +1,10 @@
 from datetime import datetime
 from dateutil.parser import parse
-from flask import request, current_app
+from flask import request
 from flask.json import JSONEncoder
 import peewee
 import requests
 import sys
-import requests
-from flask_restful import reqparse
 from playhouse.shortcuts import model_to_dict
 
 def get_user_groups(as_sql_list=False):
@@ -46,6 +44,9 @@ def request_wants_json():
     "Check whether we should send a JSON reply"
     best = request.accept_mimetypes \
         .best_match(['application/json', 'text/html'])
+    print(best)
+    print(request.accept_mimetypes[best],
+          request.accept_mimetypes['text/html'])
 
     return best == 'application/json' and \
         request.accept_mimetypes[best] >= \
@@ -61,6 +62,7 @@ class CustomJSONEncoder(JSONEncoder):
             serial = obj.timestamp()
             return serial
         elif isinstance(obj, peewee.SelectQuery):
+            print("select")
             return list(obj)
         elif isinstance(obj, peewee.Model):
             serial = model_to_dict(obj, recurse=False)

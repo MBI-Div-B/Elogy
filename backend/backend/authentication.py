@@ -5,6 +5,7 @@ from flask_restful import reqparse
 import sys
 
 def login(username, password):
+
     """
     Performs username/password autentication against the API endpoint JWT_AUTH_URL. In the case of max iv the authentication
     service returns a JSON object with the following data:
@@ -31,6 +32,7 @@ def login(username, password):
     exp - used to determine if the jwt token is still valid. In the front-end it's validated whenever the component Elogy is mounted.
         In the backend it is validated whenever access to a restricted logbook  is requested.
     """
+
     r = requests.post(
     url=current_app.config["JWT_AUTH_URL"], data={"username": username, "password": password,  "includeDecoded": True})
 
@@ -42,6 +44,7 @@ def login(username, password):
         return data
 
 def has_access(user_group="", logbook_id=None):
+
     """
     Determines if the user making the current request belongs to the given user_group, either by providing the user_group directly,
     or by giving the id of the logbook for which the user_group should be checked
