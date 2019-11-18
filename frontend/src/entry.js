@@ -277,15 +277,15 @@ class Entry extends React.Component {
 
   render() {
     const { logbook, id, loadError } = this.state;
+    if (!(id && logbook)) {
+      return <div />; // placeholder
+    }
     if (loadError) {
       return (
         <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
           {loadError}
         </div>
       );
-    }
-    if (!(id && logbook)) {
-      return <div />; // placeholder
     }
 
     const query = parseQuery(this.props.location.search);
