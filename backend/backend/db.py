@@ -10,7 +10,7 @@ from peewee import (IntegerField, CharField, TextField, BooleanField,
                     DateTimeField, ForeignKeyField, sqlite3)
 from peewee import Model, DoesNotExist, Entity
 
-from .utils import CustomJSONEncoder
+from .utils import CustomJSONEncoder, get_user_groups
 
 
 # defer the actual db setup to later, when we have read the config
@@ -593,6 +593,9 @@ class Entry(Model):
         # support recursive queries, which we need in order to search
         # through nested logbooks. Cleanup needed!
 
+        user_groups  = get_user_groups()
+        variables = []
+
         if author_filter:
             # extract the author names as a separate table, so that
             # they can be searched
@@ -671,8 +674,13 @@ class Entry(Model):
                            authors=authors, logbook=logbook.id,
                            attributes=attributes,
                            metadata=metadata,
+                           user_groups=",".join(['?']*len(user_groups)),
                            join_attachment=("JOIN attachment ON attachment.entry_id == entry.id"
                                             if attachment_filter else ""))
+                variables.extend(user_groups)
+                variables.extend(user_groups)
+                variables.extend(user_groups)
+
             else:
                 # In this case we're not searching recursively
                 query = (
@@ -721,14 +729,13 @@ class Entry(Model):
                        attachment=("path as attachment_path,"
                                    if attachment_filter else ""),
                        authors=authors,
+                       user_groups=",".join(['?']*len(user_groups)),
                        join_attachment=(
                            "JOIN attachment ON attachment.entry_id == entry.id"
                            if attachment_filter else ""))
-
+            variables.extend(user_groups)
         if not archived:
             query += " AND NOT entry.archived\n"
-
-        variables = []
 
         # if not followups:
         #     query += " AND entry.follows_id IS NULL"
