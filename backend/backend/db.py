@@ -780,10 +780,10 @@ class Entry(Model):
             if offset:
                 query += " OFFSET {}".format(offset)
         logging.debug("query=%r, variables=%r" % (query, variables))
-        print("Query", file=sys.stdout)
-        print(query, file=sys.stdout)
-        print("variables", file=sys.stdout)
-        print(variables, file=sys.stdout)
+        # print("Query", file=sys.stdout)
+        # print(query, file=sys.stdout)
+        # print("variables", file=sys.stdout)
+        # print(variables, file=sys.stdout)
          
         return Entry.raw(query, *variables)
 
