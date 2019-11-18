@@ -16,6 +16,7 @@ HTML_FOOTER = "</div></body></html>"
 def export_logbook_as_html(logbook_id, include_attachments):
     """
     Exports a logbook as a html file
+    if include_attachments, also exports all attachment and place them in a zip file along the html file
     """
     logbook = Logbook.get(Logbook.id == logbook_id)
     if not has_access(logbook_id=logbook_id):
@@ -37,11 +38,12 @@ def export_logbook_as_html(logbook_id, include_attachments):
     return html_file
 
 def get_attachment_base64(attachment_path):
+    """
+    Returns the binary file located in <upload_dir>/attachment_path as a base64 encoded string
+    """
     if attachment_path is not None and not attachment_path.startswith("/"):
         attachment_path = "/" + attachment_path
     filename = current_app.config["UPLOAD_FOLDER"] + attachment_path
-    # filename = os.path.join(current_app.config["UPLOAD_FOLDER"], attachment_path)
-    # print(filename, file=sys.stdout)
     try:
         with open(filename, "rb") as image_file:
             return base64.b64encode(image_file.read()).decode('ascii')
@@ -54,18 +56,10 @@ def get_entry_as_html(entry):
     """
     attach_sources = re.findall('src="/attachments([^"]+)"', entry.content)
     base_url = current_app.config["BASEURL"]
-    # attach_sources = re.findall('(src="/attachments([^"]+)")|(src=\'/attachments([^"]+)\')', entry.content)
     new_content = entry.content
     for attach_source in attach_sources:
         base64 = get_attachment_base64(attach_source)
         new_content = new_content.replace('src="/attachments' + attach_source, 'class="inline-image" src="data:image/png;base64, ' + base64)
-    
-
-    # attach_sources2 = re.findall("src='/attachments([^']+)'", entry.content)
-    # for attach_source in attach_sources2:
-    #     base64 = get_attachment_base64(attach_source)
-    #     new_content = new_content.replace("src='/attachments" + attach_source, "class='inline-image' src='data:image/png;base64, " + base64)
-
     entry_html = "<div class='meta'><h3><a name='{id}'>{title}</a></h3><div class='subtitle float-right'><a href=\"{base_url}/logbooks/{logbook_id}/entries/{id}/\">{base_url}/logbooks/{logbook_id}/entries/{id}/</a></div><div class='subtitle'>Created {created_at} by {authors}</div></div><div class='content'>{content}</div>".format(title=entry.title or "(No title)",
                 authors=", ".join(a["name"] for a in entry.authors),
                 created_at=entry.created_at.strftime('%Y-%m-%d %H:%M'),
@@ -78,19 +72,12 @@ def get_entry_as_html(entry):
                 authors=", ".join(a["name"] for a in followup.authors),
                 created_at=followup.created_at.strftime('%Y-%m-%d %H:%M'),
                 content=followup.content or "---")
-    # We now ignore the attachments in the html file, since they're added to the zip file instead
-    # attachments = entry.get_attachments()
-    # filtered_attachments = [x for x in attachments if x.content_type is not None and x.content_type.startswith("image")]
-    # if filtered_attachments:
-    #     entry_html = entry_html + "<div class='attachments'>Attachments</div>"
-    # for attachment in filtered_attachments:
-    #     entry_html = entry_html + "<img class='inline-image' src='data:image/png;base64, " + str(get_attachment_base64(attachment.path)) + "'/>"
     return "<div class='entry'>" + entry_html + "</div>"
     
 def export_entry_as_html(entry_id, include_attachments):
-
     """
-    Exports an elogy entry as a pdf
+    Exports an elogy entry as a html file
+    if include_attachments, also exports all attachment and place them in a zip file along the html file
     """
     entry = Entry.get(Entry.id == entry_id)
     file_id = str(entry_id) + '_' + str(int(round(time.time() * 1000)))
