@@ -744,7 +744,7 @@ class EntryEditorNew extends EntryEditorBase {
         </div>
       );
     }
-    if (!this.state.logbook) return <div>Loading...</div>;
+    if (!this.state.logbook) return <Loading/>;
 
     // Using a table here, because TinyMCE sometimes does not play well with
     // flexbox, causing height issues... hopefully this will be more robust.
@@ -921,7 +921,7 @@ class EntryEditorFollowup extends EntryEditorBase {
         </div>
       );
     }
-    if (!this.state.logbook || !this.state.entry) return <div>Loading...</div>;
+    if (!this.state.logbook || !this.state.entry) return <Loading/>;
 
     return (
       <div id="entryeditor">
@@ -1244,7 +1244,7 @@ class EntryEditorEdit extends EntryEditorBase {
         </div>
       );
     }
-    if (!(this.state.logbook && this.state.entry)) return <div>Loading...</div>;
+    if (!(this.state.logbook && this.state.entry)) return <Loading/>;
 
     return (
       <div id="entryeditor">
