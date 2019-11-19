@@ -4,7 +4,7 @@ import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import update from "immutability-helper";
-import { notification } from "./widgets";
+import { notification, Loading } from "./widgets";
 import { parseQuery } from "./util.js";
 import EntryPreviews from "./entrypreviews.js";
 import "./logbook.css";
@@ -240,7 +240,7 @@ class Logbook extends React.Component {
   }
 
   render() {
-    const { logbook, downloading, loadError } = this.state;
+    const { logbook, downloading, loadError, loading } = this.state;
     if (loadError) {
       return <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
         {this.state.loadError}
@@ -376,6 +376,7 @@ class Logbook extends React.Component {
           )}
         </header>
         <div className="entries-container">
+          {loading && <Loading/>}
           <div ref="entries">
             <EntryPreviews
               logbook={logbook}
