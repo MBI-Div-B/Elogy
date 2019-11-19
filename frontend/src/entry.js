@@ -4,7 +4,7 @@ import React from "react";
 import { findDOMNode } from "react-dom";
 import { Link } from "react-router-dom";
 import Mark from "mark.js";
-import { notification } from "./widgets.js";
+import { notification, Loading } from "./widgets.js";
 import "./entry.css";
 import { formatDateTimeString } from "./util.js";
 import { parseQuery } from "./util.js";
@@ -227,6 +227,7 @@ class Entry extends React.Component {
   }
 
   async fetchEntry(logbookId, entryId) {
+    this.setState({ loading: true });
     const response = await fetch(
       `/api/logbooks/${logbookId}/entries/${entryId}/?thread=true`,
       {
@@ -276,9 +277,11 @@ class Entry extends React.Component {
   }
 
   render() {
-    const { logbook, id, loadError } = this.state;
-    if (!(id && logbook)) {
-      return <div />; // placeholder
+    const { logbook, id, loadError, loading } = this.state;
+    if (loading) {
+      return (
+        <Loading/>
+      );
     }
     if (loadError) {
       return (
@@ -286,6 +289,9 @@ class Entry extends React.Component {
           {loadError}
         </div>
       );
+    }
+    if (!(id && logbook)) {
+      return <div />; // placeholder on no logbook
     }
 
     const query = parseQuery(this.props.location.search);

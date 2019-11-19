@@ -1,4 +1,21 @@
 import React from "react";
+export const Loading = () => {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          background: "white",
+          padding: "0.5em 0em",
+          fontSize: "1.2em",
+          borderBottom: "1px solid #eee"
+        }}
+      >
+        <i style={{marginRight: "0.5em"}} className="fa fa-refresh fa-spin" />
+      </div>
+    );
+}
+
+
 export const notification = msg => {
   return (
     <div
