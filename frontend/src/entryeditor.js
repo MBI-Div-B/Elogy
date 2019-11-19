@@ -1203,7 +1203,7 @@ class EntryEditorEdit extends EntryEditorBase {
           title="Upload the entry"
           onClick={this.onSubmit.bind(this, history)}
         >
-          Submit
+          Save and close
         </button>
       );
     }
