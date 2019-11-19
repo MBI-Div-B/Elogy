@@ -376,7 +376,7 @@ class Logbook extends React.Component {
           )}
         </header>
         <div className="entries-container">
-          {loading && <Loading/>}
+          {loading ? <Loading/>:
           <div ref="entries">
             <EntryPreviews
               logbook={logbook}
@@ -386,7 +386,7 @@ class Logbook extends React.Component {
               sortBy={this.state.sortBy}
             />
             {loadMore}
-          </div>
+          </div>}
         </div>
       </div>
     );
