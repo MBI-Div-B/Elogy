@@ -17,6 +17,7 @@ import Select from "react-select";
 import { Creatable, Async } from "react-select";
 import Dropzone from "react-dropzone";
 import "react-select/dist/react-select.css";
+import { notification, Loading } from "./widgets";
 
 import { EntryAttachments } from "./entryattachments.js";
 import TINYMCE_CONFIG from "./tinymceconfig.js";
@@ -24,7 +25,6 @@ import { withProps, debounce } from "./util.js";
 import { InnerEntry } from "./entry.js";
 import { MoveEntryWidget } from "./moveWidgets.js";
 import "./entryeditor.css";
-import { notification } from "./widgets";
 
 class EntryAttributeEditor extends React.Component {
   /* editor for a single attribute */
