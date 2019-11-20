@@ -9,13 +9,13 @@ import { parseQuery } from "./util.js";
 import EntryPreviews from "./entrypreviews.js";
 import "./logbook.css";
 
-function LoadMore({ loading, moreEntries, onLoadMore }) {
+function LoadMore({ loadingMore, moreEntries, onLoadMore }) {
   return (
-    <div className="load-more">
-      {loading ? (
+    <div className="load-more btn-link">
+      {loadingMore ? (
         <i className="fa fa-refresh fa-spin" />
       ) : moreEntries ? (
-        <div onClick={onLoadMore.bind(this)}>Load more</div>
+        <div title="Load more entries from this logbook" onClick={onLoadMore.bind(this)}>Load more</div>
       ) : null}
     </div>
   );
@@ -29,6 +29,7 @@ class Logbook extends React.Component {
       entries: [],
       attributeFilters: {},
       loading: false,
+      loadingMore: false, //we need to differentiate between an initial entry load and a "Load more" load. The latter should not discard existing entries, but only append.
       downloading: false,
       loadError: "", //if truthy, we've failed to load the logbook
       moreEntries: true,
@@ -72,7 +73,15 @@ class Logbook extends React.Component {
   }
 
   // Fetch entries
-  async fetch(logbookId, search, attributeFilters, sortBy, offset, n) {
+  async fetch(
+    logbookId,
+    search,
+    attributeFilters,
+    sortBy,
+    loadingMore,
+    offset,
+    n
+  ) {
     const query = search ? parseQuery(search) : {};
     query["n"] = n || query["n"] || 50;
     query["offset"] = offset || 0;
@@ -91,7 +100,7 @@ class Logbook extends React.Component {
     const url = `/api/logbooks/${logbookId || 0}/entries/?${newSearch ||
       ""}&sort_by=${sortBy}&sort_by_timestamp=${sortByTimestamp}`;
 
-    this.setState({ loading: true });
+    this.setState({ loading: true, loadingMore });
     const response = await fetch(url, {
       headers: { Accept: "application/json" }
     });
@@ -114,7 +123,7 @@ class Logbook extends React.Component {
       return;
     }
     const json = await response.json();
-    this.setState({ loading: false, loadError: "" });
+    this.setState({ loading: false, loadError: "", loadingMore: false });
     if (offset) {
       // append the new entries
       this.setState(update(this.state, { entries: { $push: json.entries } }));
@@ -144,7 +153,8 @@ class Logbook extends React.Component {
       this.props.match.params.logbookId,
       this.props.location.search,
       this.state.attributeFilters,
-      this.state.sortBy
+      this.state.sortBy,
+      false
     );
   }
 
@@ -160,7 +170,8 @@ class Logbook extends React.Component {
         newProps.match.params.logbookId,
         newProps.location.search,
         newState.attributeFilters,
-        newState.sortBy
+        newState.sortBy,
+        false
       );
     }
     // reset the filters if we've moved to another logbook
@@ -185,7 +196,8 @@ class Logbook extends React.Component {
       this.props.match.params.logbookId,
       this.props.location.search,
       this.state.attributeFilters,
-      this.state.sortBy
+      this.state.sortBy,
+      false
     );
   }
 
@@ -196,10 +208,9 @@ class Logbook extends React.Component {
       : "Elogy";
     // make sure the entry list is scrolled to the top
     if (match.params.logbookId !== this.props.match.params.logbookId)
-    try{
-      findDOMNode(this.refs.entries).scrollIntoView();
-    }catch(e){}
-      
+      try {
+        findDOMNode(this.refs.entries).scrollIntoView();
+      } catch (e) {}
   }
 
   onChangeAttributeFilter(attribute, event) {
@@ -227,6 +238,7 @@ class Logbook extends React.Component {
       this.props.location.search,
       this.state.attributeFilters,
       this.state.sortBy,
+      true,
       this.state.entries.length
     );
   }
@@ -240,11 +252,19 @@ class Logbook extends React.Component {
   }
 
   render() {
-    const { logbook, downloading, loadError, loading } = this.state;
+    const {
+      logbook,
+      downloading,
+      loadError,
+      loading,
+      loadingMore
+    } = this.state;
     if (loadError) {
-      return <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
-        {this.state.loadError}
-      </div>
+      return (
+        <div style={{ padding: "2em", fontSize: "1.2em", textAlign: "center" }}>
+          {this.state.loadError}
+        </div>
+      );
     }
     const entryId = this.props.match.params.entryId
         ? parseInt(this.props.match.params.entryId, 10)
@@ -278,7 +298,7 @@ class Logbook extends React.Component {
         : null,
       loadMore = this.state.moreEntries ? (
         <LoadMore
-          loading={this.state.loading}
+          loadingMore={this.state.loadingMore}
           moreEntries={this.state.moreEntries}
           onLoadMore={this.onLoadMore.bind(this)}
         />
@@ -376,17 +396,20 @@ class Logbook extends React.Component {
           )}
         </header>
         <div className="entries-container">
-          {loading ? <Loading/>:
-          <div ref="entries">
-            <EntryPreviews
-              logbook={logbook}
-              entries={this.state.entries}
-              search={this.props.location.search}
-              selectedEntryId={entryId}
-              sortBy={this.state.sortBy}
-            />
-            {loadMore}
-          </div>}
+          {loading && !loadingMore ? (
+            <Loading />
+          ) : (
+            <div ref="entries">
+              <EntryPreviews
+                logbook={logbook}
+                entries={this.state.entries}
+                search={this.props.location.search}
+                selectedEntryId={entryId}
+                sortBy={this.state.sortBy}
+              />
+              {loadMore}
+            </div>
+          )}
         </div>
       </div>
     );

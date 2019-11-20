@@ -68,10 +68,9 @@ background: repeating-linear-gradient(
 
 #logbook .load-more {
     padding: 5px;
-    border-top: 1px solid #eee;
-    border-bottom: 1px solid #eee;
     text-align: center;
     background: white;
+    cursor: pointer;
 }
 
 #logbook dd {

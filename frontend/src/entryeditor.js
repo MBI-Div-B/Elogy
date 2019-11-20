@@ -17,6 +17,7 @@ import Select from "react-select";
 import { Creatable, Async } from "react-select";
 import Dropzone from "react-dropzone";
 import "react-select/dist/react-select.css";
+import { notification, Loading } from "./widgets";
 
 import { EntryAttachments } from "./entryattachments.js";
 import TINYMCE_CONFIG from "./tinymceconfig.js";
@@ -24,7 +25,6 @@ import { withProps, debounce } from "./util.js";
 import { InnerEntry } from "./entry.js";
 import { MoveEntryWidget } from "./moveWidgets.js";
 import "./entryeditor.css";
-import { notification } from "./widgets";
 
 class EntryAttributeEditor extends React.Component {
   /* editor for a single attribute */
@@ -474,6 +474,7 @@ class EntryEditorBase extends React.Component {
         className="btn btn-info btn-sm ml-1"
         title="Upload the entry"
         onClick={this.onSubmit.bind(this, history)}
+        disabled={this.state.saving}
       >
         Submit
       </button>
@@ -668,6 +669,7 @@ class EntryEditorNew extends EntryEditorBase {
     /* TODO: here we might do some checking of the input; e.g.
            verify that any required attributes are filled in etc. */
 
+    this.setState({saving: true})
     // we're creating a new entry
     fetch(`/api/logbooks/${this.state.logbook.id}/entries/`, {
       method: "POST",
@@ -695,14 +697,15 @@ class EntryEditorNew extends EntryEditorBase {
         response.json().then(
           error => {
             console.log("error", error);
-            this.setState({ error: error });
+            this.setState({ error: error, saving: false });
           },
           error => {
             console.log("error", error);
             this.setState({
+              saving: false,
               error: {
                 message: response.statusText,
-                code: response.status
+                code: response.status,
               }
             });
           }
@@ -729,9 +732,11 @@ class EntryEditorNew extends EntryEditorBase {
               });
             }
           );
+          this.setState({saving: false})
         },
         error => {
           console.log(error);
+          this.setState({saving: false})
         }
       );
   }
@@ -744,7 +749,7 @@ class EntryEditorNew extends EntryEditorBase {
         </div>
       );
     }
-    if (!this.state.logbook) return <div>Loading...</div>;
+    if (!this.state.logbook) return <Loading/>;
 
     // Using a table here, because TinyMCE sometimes does not play well with
     // flexbox, causing height issues... hopefully this will be more robust.
@@ -921,7 +926,7 @@ class EntryEditorFollowup extends EntryEditorBase {
         </div>
       );
     }
-    if (!this.state.logbook || !this.state.entry) return <div>Loading...</div>;
+    if (!this.state.logbook || !this.state.entry) return <Loading/>;
 
     return (
       <div id="entryeditor">
@@ -1054,6 +1059,7 @@ class EntryEditorEdit extends EntryEditorBase {
 
   onSave() {
     this.submitted = true;
+    this.setState({saving: true})
     fetch(
       `/api/logbooks/${this.state.logbook.id}/entries/${this.state.entry.id}/`,
       {
@@ -1079,6 +1085,7 @@ class EntryEditorEdit extends EntryEditorBase {
       if (response.ok) {
         this.setState({
           notification: "Entry saved",
+          saving: false,
           entry: {
             ...this.state.entry,
             revision_n: this.state.entry.revision_n + 1
@@ -1087,7 +1094,7 @@ class EntryEditorEdit extends EntryEditorBase {
         setTimeout(() => this.setState({ notification: "" }), 2000);
       } else {
         response.json().then(error => {
-          this.setState({ error: error });
+          this.setState({ error, saving: false });
         });
       }
     });
@@ -1095,6 +1102,7 @@ class EntryEditorEdit extends EntryEditorBase {
   onSubmit({ history }) {
     this.submitted = true;
     // we're creating a new entry
+    this.setState({saving: true})
     fetch(
       `/api/logbooks/${this.state.logbook.id}/entries/${this.state.entry.id}/`,
       {
@@ -1123,10 +1131,11 @@ class EntryEditorEdit extends EntryEditorBase {
         }
         response.json().then(
           error => {
-            this.setState({ error: error });
+            this.setState({ error, saving: false });
           },
           error => {
             this.setState({
+              saving: false,
               error: {
                 message: response.statusText,
                 code: response.status
@@ -1154,9 +1163,11 @@ class EntryEditorEdit extends EntryEditorBase {
               search: window.location.search
             });
           });
+          this.setState({saving: false})
         },
         error => {
           console.log(error);
+          this.setState({saving: false})
         }
       );
   }
@@ -1202,8 +1213,9 @@ class EntryEditorEdit extends EntryEditorBase {
           className="btn btn-info btn-sm ml-1"
           title="Upload the entry"
           onClick={this.onSubmit.bind(this, history)}
+          disabled={this.state.saving}
         >
-          Submit
+          Save and close
         </button>
       );
     }
@@ -1244,7 +1256,7 @@ class EntryEditorEdit extends EntryEditorBase {
         </div>
       );
     }
-    if (!(this.state.logbook && this.state.entry)) return <div>Loading...</div>;
+    if (!(this.state.logbook && this.state.entry)) return <Loading/>;
 
     return (
       <div id="entryeditor">
@@ -1313,6 +1325,7 @@ class EntryEditorEdit extends EntryEditorBase {
                       className="btn btn-secondary btn-sm ml-1"
                       title="Save the entry"
                       onClick={this.onSave.bind(this, history)}
+                      disabled={this.state.saving}
                     >
                       Save
                     </button>
