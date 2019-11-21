@@ -184,13 +184,13 @@ background: repeating-linear-gradient(
 }
 
 #logbook .entry .tags .tag {
-    background: green;
-    color: white;
-    border: 2px solid white;
-    border-radius: 5px;
-    padding: 0 3px;
-    margin-left: 5px;
-    font-weight: bold;
+    background: #f1faff;
+    color: #5785a2;
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin-left: 2px;
+    border: 1px solid #c9dbe6;
+    font-size: 0.9em;
 }
 
 #logbook dd.entry:not(:last-child) {

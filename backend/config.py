@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 
 TITLE = os.getenv('ELOGY_TITLE', 'elogy')
 
@@ -66,11 +67,11 @@ def new_entry(data):
             fromaddr = "elogy@maxiv.lu.se"
 
         toaddrs = entry["attributes"]["Mailto"]
-        linkToText = 'Sent from Elogy, original post can be found at:'
+        if isinstance(toaddrs, list):
+            toaddrs = ",".join(toaddrs)
+        linkToText = 'Sent from Elogy, original post can be found '
         linkToEntry = BASEURL + '/logbooks/' + str(entry["logbook"]["id"]) + '/entries/' + str(entry["id"])
-        content = "<html> {} <br> {} </html>".format(entry["content"], linkToText + linkToEntry)
-        content = re.sub('src="', 'src="' + BASEURL, content)
-        content = re.sub('href="', 'href="' + BASEURL, content)
+        content = "<html> {} <br> {} </html>".format(entry["content"], linkToText + "<a href='" + linkToEntry + "'>here</a>")
         message = MIMEText(content, "html")
         message["Subject"] = entry["title"]
         message["From"] = fromaddr

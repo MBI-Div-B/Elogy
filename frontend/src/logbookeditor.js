@@ -675,6 +675,12 @@ class LogbookEditorEdit extends LogbookEditorBase {
               Add
             </button>
           </div>
+          <div className="info-panel">Some attributes names comes with special features:
+            <ul style={{margin: "0.2em 0em"}}>
+              <li><b>Mailto</b> - Will send an email to the address specified as the attribute value when the entry is created. Supports the data types Text, Option and Multioption </li>
+              <li><b>Tags</b> - Will show the attribute value in the entry preview list (Elogy middle panel). Supported by all data types.</li>
+            </ul>
+          </div>
           <div className="attributes">{this.getAttributes()}</div>
         </form>
 
