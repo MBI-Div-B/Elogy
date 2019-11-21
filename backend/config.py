@@ -72,6 +72,8 @@ def new_entry(data):
         linkToText = 'Sent from Elogy, original post can be found '
         linkToEntry = BASEURL + '/logbooks/' + str(entry["logbook"]["id"]) + '/entries/' + str(entry["id"])
         content = "<html> {} <br> {} </html>".format(entry["content"], linkToText + "<a href='" + linkToEntry + "'>here</a>")
+        content = re.sub('src="/attachments/', 'src="' + BASEURL + "/attachments/", content)
+        content = re.sub('href="/attachments/', 'href="' + BASEURL + "/attachments/", content)
         message = MIMEText(content, "html")
         message["Subject"] = entry["title"]
         message["From"] = fromaddr
