@@ -5,16 +5,40 @@ import { Link } from "react-router-dom";
 import LazyLoad from "react-lazy-load";
 
 import { AttachmentPreviewIcon } from "./entryattachments.js";
-import { groupBy, formatTimeString, formatDateString } from "./util.js";
+import {
+  groupBy,
+  formatTimeString,
+  formatDateString,
+  isBoolean
+} from "./util.js";
 
 const Tags = ({ attributes }) => {
   if (attributes && attributes.Tags) {
-    const tags = attributes.Tags.map(tag => (
-      <span key={tag} className="tag">
-        {tag}
-      </span>
-    ));
-    return <div className="tags">{tags}</div>;
+    if (Array.isArray(attributes.Tags)) {
+      const tags = attributes.Tags.map(tag => (
+        <span key={tag} className="tag">
+          {tag}
+        </span>
+      ));
+      return <div className="tags">{tags}</div>;
+    } else if(isBoolean(attributes.Tags)){
+      return (
+        <div className="tags">
+          <span key={attributes.Tags} className="tag">
+            {attributes.Tags ? "True" : "False"}
+          </span>
+        </div>
+      );
+
+    }else{
+      return (
+        <div className="tags">
+          <span key={attributes.Tags} className="tag">
+            {attributes.Tags}
+          </span>
+        </div>
+      );
+    }
   }
   return null;
 };

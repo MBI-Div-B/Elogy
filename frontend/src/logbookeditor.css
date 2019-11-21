@@ -83,3 +83,12 @@
     font-size: 1.2em;
     margin: 0.5em 0em 0em 0em;
 }
+
+.info-panel{
+    padding: 0.5em;
+    border: 1px solid #ddd;
+    background: white;
+    font-style: italic;
+    font-size: 0.9em;
+    color: #666;
+}
