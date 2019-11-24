@@ -87,11 +87,11 @@ class Logbook extends React.Component {
     query["offset"] = offset || 0;
     const attributes = Object.keys(attributeFilters)
       .filter(key => attributeFilters[key])
-      .map(key => `attribute=${key}:${attributeFilters[key]}`)
+      .map(key => `attribute=${key}:${encodeURIComponent(attributeFilters[key])}`)
       .join("&");
     const newSearch =
       Object.keys(query)
-        .map(key => `${key}=${query[key]}`)
+        .map(key => `${key}=${encodeURIComponent(query[key])}`)
         .join("&") +
       "&" +
       attributes;
