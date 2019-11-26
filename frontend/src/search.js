@@ -31,7 +31,7 @@ class QuickSearch extends React.Component {
     // and sharing.
     const query = Object.keys(this.state)
       .filter(key => this.state[key])
-      .map(key => `${key}=${this.state[key]}`);
+      .map(key => `${key}=${encodeURIComponent(this.state[key])}`);
 
     // The parent parameter also needs to be kept around because it
     // is used to limit the set of visible logbooks.

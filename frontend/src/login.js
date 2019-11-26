@@ -47,7 +47,7 @@ class Login extends Component {
                 onClick={() => this.setState({ showModal: true })}
                 className="btn btn-link"
                 style={{ fontSize: "0.95em" }}
-                title="Login to view or create group specific logbooks"
+                title="Login to view or create group specific logbooks (also autofills you as an author on new entries)"
               >
                 Login
               </button>

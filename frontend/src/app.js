@@ -25,7 +25,6 @@ const eventbus = new EventBus();
 
 const LogbookTreeWithEventbus = withProps(LogbookTree, { eventbus });
 const LogbookWithEventbus = withProps(Logbook, { eventbus });
-const EntryEditorWithEventbus = withProps(EntryEditor, { eventbus });
 
 // dummy components for when no logbook is selected
 class NoLogbook extends React.Component {
@@ -223,11 +222,25 @@ class Elogy extends React.Component {
             <Switch>
               <Route
                 path="/logbooks/:logbookId/entries/new"
-                component={EntryEditorWithEventbus}
+                render={props => (
+                  <EntryEditor
+                    loggedIn={loggedIn}
+                    userCredentials={userCredentials}
+                    eventbus={eventbus}
+                    {...props}
+                  />
+                )}
               />
               <Route
                 path="/logbooks/:logbookId/entries/:entryId/:command"
-                component={EntryEditorWithEventbus}
+                render={props => (
+                  <EntryEditor
+                    loggedIn={loggedIn}
+                    userCredentials={userCredentials}
+                    eventbus={eventbus}
+                    {...props}
+                  />
+                )}
               />
 
               <Route

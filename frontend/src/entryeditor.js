@@ -303,8 +303,16 @@ class EntryEditorBase extends React.Component {
   }
 
   loadSessionAuthors() {
+    const { userCredentials, loggedIn } = this.props;
     const sessionNewAuthorsEncoded = window.sessionStorage.newAuthors;
-    if (sessionNewAuthorsEncoded) {
+    if (userCredentials && loggedIn){
+      const author = {
+        email: userCredentials.email,
+        login: userCredentials.username,
+        name: userCredentials.name,
+      }
+      this.setState({ authors: [author] });
+    }else if (sessionNewAuthorsEncoded) {
       const sessionNewAuthors = JSON.parse(sessionNewAuthorsEncoded);
       this.setState({ authors: sessionNewAuthors });
     }

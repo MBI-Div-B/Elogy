@@ -214,6 +214,8 @@ background: repeating-linear-gradient(
     position: sticky;    
     color: #026a7b;
     background: #e7f0f1;
+    border-bottom: 1px solid #d5e3e4;
+    border-top: 1px solid #d5e3e4;
     text-align: center;
     z-index: 1;
     font-weight: 800;
@@ -225,11 +227,15 @@ background: repeating-linear-gradient(
 #logbook dt.pinned {
     background: #ffffb3;
     color: #84840d;
+    border-bottom: 1px solid #e6e67e;
+    border-top: 1px solid #e6e67e;
 }
 
 #logbook dt.important {
     background: #ffbebe;
     color: #861818;
+    border-bottom: 1px solid #e69494;
+    border-top: 1px solid #e69494;
 }
 
 #logbook .attributes {
