@@ -52,6 +52,7 @@ class Logbook extends React.Component {
     // instead it is necessary to use msSaveOrOpenBlob
     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
       window.navigator.msSaveOrOpenBlob(newBlob);
+      this.setState({ downloading: false });
       return;
     }
 

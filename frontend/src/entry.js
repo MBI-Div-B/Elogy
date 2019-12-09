@@ -38,13 +38,13 @@ export class InnerEntry extends React.Component {
       headers: { Accept: "application/zip" }
     });
     const blob = await response.blob();
-    this.setState({ downloading: false });
     var newBlob = new Blob([blob], { type: "application/zip" });
 
     // IE doesn't allow using a blob object directly as link href
     // instead it is necessary to use msSaveOrOpenBlob
     if (window.navigator && window.navigator.msSaveOrOpenBlob) {
       window.navigator.msSaveOrOpenBlob(newBlob);
+      this.setState({ downloading: false });
       return;
     }
 
@@ -53,12 +53,16 @@ export class InnerEntry extends React.Component {
     const data = window.URL.createObjectURL(newBlob);
     var link = document.createElement("a");
     link.href = data;
+    link.setAttribute("type", "hidden");
     link.download = "elogy_entry_" + this.props.id + ".zip";
+    document.body.appendChild(link);
     link.click();
     setTimeout(function() {
       // For Firefox it is necessary to delay revoking the ObjectURL
       window.URL.revokeObjectURL(data);
-    }, 100);
+      link.remove();
+    }, 1000);
+    this.setState({ downloading: false });
   }
 
   scrollToCurrentEntry() {
