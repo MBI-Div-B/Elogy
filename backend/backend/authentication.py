@@ -50,7 +50,7 @@ def has_access(user_group="", logbook_id=None):
     or by giving the id of the logbook for which the user_group should be checked
     Returns True if 
         1) user_group is not defined (implying the logbook has no group lock), OR
-        2) if the jwt can be properly decoded by the jwt-auth service, and its group list includes user_group
+        2) if the jwt can be properly decoded by the auth service, and its group list includes user_group
     """
 
     if not logbook_id is None:
