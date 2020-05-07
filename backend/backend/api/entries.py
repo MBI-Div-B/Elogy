@@ -72,10 +72,11 @@ class EntryDownloadResource(Resource):
 
 class EntryLastEditedResource(Resource):
     "Handles requests fetching updatetime of an entry"
-    def get(self, args, entry_id):
-        entry = Entry.get(Entry.id == entry_id)
-        return entry.last_changed_at
 
+    @use_args({"entry_id": Integer(allow_none=True)})
+    def get(self, args):
+        entry = Entry.get(Entry.id ==  args["entry_id"])
+        return entry.last_changed_at
 
 class EntryResource(Resource):
 

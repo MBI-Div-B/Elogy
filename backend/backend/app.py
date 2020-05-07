@@ -71,7 +71,7 @@ api.add_resource(EntriesResource,
                  "/logbooks/<int:logbook_id>/entries/")  # GET
 
 api.add_resource(EntryLastEditedResource,
-                 "/entryLastEdited/<int:entry_id>/")
+                 "/entryLastEdited/")
 api.add_resource(EntryResource,
                  "/entries/<int:entry_id>/",
                  "/entries/<int:entry_id>/revisions/<int:revision_n>",
