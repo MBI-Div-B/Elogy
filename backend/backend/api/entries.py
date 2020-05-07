@@ -76,7 +76,8 @@ class EntryLastEditedResource(Resource):
     @use_args({"entry_id": Integer(allow_none=True)})
     def get(self, args):
         entry = Entry.get(Entry.id == int(args["entry_id"]))
-        return "test"
+        test = str(entry.last_changed_at)
+        return test
 
 class EntryResource(Resource):
 
