@@ -11,7 +11,7 @@ import logging
 from .api.errors import errors as api_errors
 from .api.logbooks import LogbooksResource, LogbookChangesResource
 from .api.entries import (EntryResource, EntriesResource, EntryDownloadResource,
-                          EntryLockResource, EntryChangesResource)
+                          EntryLockResource, EntryLastEditedResource, EntryChangesResource)
 from .api.auth import AuthResource
 from .api.users import UsersResource
 from .api.attachments import AttachmentsResource
@@ -70,6 +70,8 @@ api.add_resource(EntryDownloadResource, "/download/")
 api.add_resource(EntriesResource,
                  "/logbooks/<int:logbook_id>/entries/")  # GET
 
+api.add_resource(EntryLastEditedResource,
+                 "/entryLastEdited/<int:entry_id>/")
 api.add_resource(EntryResource,
                  "/entries/<int:entry_id>/",
                  "/entries/<int:entry_id>/revisions/<int:revision_n>",
@@ -112,5 +114,5 @@ def get_index(path=None):
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=8000, #debug=True,
+    app.run(host="0.0.0.0", port=8000,  # debug=True,
             extra_files=["templates"])  # this makes sure templates are watched
