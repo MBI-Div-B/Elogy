@@ -30,9 +30,10 @@ export class InnerEntry extends React.Component {
         headers: { Accept: "text/html" },
       });
       const currentTimestamp = Date.parse(this.props && this.props.last_changed_at);
+      const json = await response.json();
       console.log("last changed at", this.props.last_changed_at);
-      console.log("response:", response.json())
-      console.log("response parsed", Date.parse(response.json()))
+      console.log("response:", json)
+      console.log("response parsed", Date.parse(json))
       // this.setState({ lastEdited: Date.parse(response.json()) });
     }, 5000);
   }
