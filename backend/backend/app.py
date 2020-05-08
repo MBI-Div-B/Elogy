@@ -11,7 +11,7 @@ import logging
 from .api.errors import errors as api_errors
 from .api.logbooks import LogbooksResource, LogbookChangesResource
 from .api.entries import (EntryResource, EntriesResource, EntryDownloadResource,
-                          EntryLockResource, EntryEditedResource, EntryLastEditedResource, EntryChangesResource)
+                          EntryLockResource, EntryEditedResource, EntryChangesResource)
 from .api.auth import AuthResource
 from .api.users import UsersResource
 from .api.attachments import AttachmentsResource
@@ -69,9 +69,6 @@ api.add_resource(AuthResource, "/auth/")
 api.add_resource(EntryDownloadResource, "/download/")
 api.add_resource(EntriesResource,
                  "/logbooks/<int:logbook_id>/entries/")  # GET
-
-api.add_resource(EntryLastEditedResource,
-                 "/entryLastEdited/")
 
 api.add_resource(EntryEditedResource,
                 "/entries/<int:entry_id>/edited")

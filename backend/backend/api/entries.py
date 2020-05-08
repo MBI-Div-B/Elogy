@@ -70,22 +70,13 @@ class EntryDownloadResource(Resource):
         return send_file(html, mimetype="application/zip", as_attachment=True, attachment_filename=(html))
 
 
-class EntryLastEditedResource(Resource):
-    "Handles requests fetching updatetime of an entry"
-
-    @use_args({"entry_id": Integer(allow_none=True)})
-    def get(self, args):
-        entry = Entry.get(Entry.id == int(args["entry_id"]))
-        test = str(entry.last_changed_at)
-        return test
 
 class EntryEditedResource(Resource):
     "Handles requests fetching updatetime of an entry"
 
     def get(self, entry_id):
         entry = Entry.get(Entry.id == entry_id)
-        test = str(entry.last_changed_at)
-        return test
+        return str(entry.last_changed_at)
 
 class EntryResource(Resource):
 
