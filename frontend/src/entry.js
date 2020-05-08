@@ -18,7 +18,7 @@ export class InnerEntry extends React.Component {
   constructor() {
     super();
     this.download = this.download.bind(this);
-    this.state = { downloading: false, lastEdited: "" };
+    this.state = { downloading: false, newerVersion: false};
   }
   componentDidMount() {
     this.highlightContentFilter();
@@ -29,13 +29,21 @@ export class InnerEntry extends React.Component {
         method: "GET",
         headers: { Accept: "text/html" },
       });
-      this.setState({ lastEdited: response.json() });
+      const currentTimestamp = Date.parse(this.props && this.props.last_changed_at);
+      console.log("last changed at", this.props.last_changed_at);
+      console.log("response:", response.json())
+      console.log("response parsed", Date.parse(response.json()))
+      // this.setState({ lastEdited: Date.parse(response.json()) });
     }, 5000);
   }
 
   componentDidUpdate() {
     this.highlightContentFilter();
     this.scrollToCurrentEntry();
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
   async download() {
@@ -273,9 +281,6 @@ class Entry extends React.Component {
       this.props.match.params.logbookId,
       this.props.match.params.entryId
     );
-  }
-  componentWillUnmount() {
-    clearInterval(this.interval);
   }
   async UNSAFE_componentWillReceiveProps(newProps) {
     if (
