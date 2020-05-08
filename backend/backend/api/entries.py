@@ -79,6 +79,14 @@ class EntryLastEditedResource(Resource):
         test = str(entry.last_changed_at)
         return test
 
+class EntryEditedResource(Resource):
+    "Handles requests fetching updatetime of an entry"
+
+    def get(self, entry_id):
+        entry = Entry.get(Entry.id == entry_id)
+        test = str(entry.last_changed_at)
+        return test
+
 class EntryResource(Resource):
 
     "Handle requests for a single entry"
