@@ -76,7 +76,7 @@ class EntryEditedResource(Resource):
 
     def get(self, entry_id):
         entry = Entry.get(Entry.id == entry_id)
-        return str(entry.last_changed_at)
+        return str(entry.last_changed_at) + " -0000"
 
 class EntryResource(Resource):
 
