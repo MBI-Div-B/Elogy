@@ -10,6 +10,8 @@ import { formatDateTimeString } from "./util.js";
 import { parseQuery } from "./util.js";
 import EntryAttributes from "./entryattributes.js";
 import EntryAttachments from "./entryattachments.js";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
 
 // This component renders an entry.
 // An "entry" may have "followup" entries attached, and so on, so in
@@ -24,17 +26,19 @@ export class InnerEntry extends React.Component {
     this.highlightContentFilter();
     this.scrollToCurrentEntry();
     this.interval = setInterval(async () => {
-      const url = `/api/entries/${this.props.id}/edited`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: { Accept: "text/html" },
-      });
-      const currentTimestamp = Date.parse(this.props && this.props.last_changed_at);
-      const json = await response.json();
-      console.log("last changed at", this.props.last_changed_at);
-      console.log("response:", json)
-      console.log("response parsed", Date.parse(json))
-      // this.setState({ lastEdited: Date.parse(response.json()) });
+      try{
+        const response = await fetch(`/api/entries/${this.props.id}/edited`, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+        });
+        const json = await response.json();
+        const date = new Date();
+        const diff =  Date.parse(json) - Date.parse(this.props.last_changed_at);
+        if (diff > 1000){
+          this.setState({newerVersion: true})
+        }
+      }catch(error){
+      }
     }, 5000);
   }
 
@@ -98,7 +102,7 @@ export class InnerEntry extends React.Component {
   }
 
   render() {
-    const { downloading } = this.state;
+    const { downloading, newerVersion } = this.state;
     const logbook = this.props.logbook;
     const followups = this.props.followups
       ? this.props.followups.map((followup, i) => (
@@ -109,6 +113,7 @@ export class InnerEntry extends React.Component {
             logbook={this.props.logbook}
             currentEntryId={this.props.currentEntryId}
             contentFilter={this.props.contentFilter}
+            fetchEntry={this.props.fetchEntry}
             {...followup}
           />
         ))
@@ -204,6 +209,17 @@ export class InnerEntry extends React.Component {
               >
                 Download
               </button>
+              {newerVersion && <button
+                type="button"
+                className="btn btn-link"
+                title={`Someone has updated this entry. Click to refresh`}
+                onClick={() => this.props.fetchEntry(
+                  this.props.logbook.id,
+                  this.props.id,
+                )}
+              >
+                <FontAwesomeIcon icon={faSyncAlt} />
+              </button>}
             </div>
             <div>
               {followupNumber}
@@ -386,6 +402,7 @@ class Entry extends React.Component {
               {...this.state}
               contentFilter={query.content}
               currentEntryId={parseInt(this.props.match.params.entryId, 10)}
+              fetchEntry={(logbookid, entryid) => this.fetchEntry(logbookid, entryid)}
             />
           </div>
         </div>
