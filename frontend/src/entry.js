@@ -33,7 +33,8 @@ export class InnerEntry extends React.Component {
         });
         const json = await response.json();
         const date = new Date();
-        const diff =  Date.parse(json) - Date.parse(this.props.last_changed_at);
+        const diff =  Date.parse(json) - Date.parse(this.props.last_changed_at || 0);
+        console.log(diff);
         if (diff > 1000){
           this.setState({newerVersion: true})
         }
