@@ -10,6 +10,8 @@ import { formatDateTimeString } from "./util.js";
 import { parseQuery } from "./util.js";
 import EntryAttributes from "./entryattributes.js";
 import EntryAttachments from "./entryattachments.js";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
 
 // This component renders an entry.
 // An "entry" may have "followup" entries attached, and so on, so in
@@ -18,11 +20,27 @@ export class InnerEntry extends React.Component {
   constructor() {
     super();
     this.download = this.download.bind(this);
-    this.state = { downloading: false };
+    this.state = { downloading: false, newerVersion: false};
   }
   componentDidMount() {
     this.highlightContentFilter();
     this.scrollToCurrentEntry();
+    this.interval = setInterval(async () => {
+      try{
+        const response = await fetch(`/api/entries/${this.props.id}/edited`, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+        });
+        const json = await response.json();
+        const date = new Date();
+        const diff =  Date.parse(json) - Date.parse(this.props.last_changed_at || 0);
+        console.log(diff);
+        if (diff > 1000){
+          this.setState({newerVersion: true})
+        }
+      }catch(error){
+      }
+    }, 5000);
   }
 
   componentDidUpdate() {
@@ -30,12 +48,16 @@ export class InnerEntry extends React.Component {
     this.scrollToCurrentEntry();
   }
 
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
   async download() {
     this.setState({ downloading: true });
     const url = `/api/download/?entry_id=${this.props.id}&include_attachments=true`;
     const response = await fetch(url, {
       method: "GET",
-      headers: { Accept: "application/zip" }
+      headers: { Accept: "application/zip" },
     });
     const blob = await response.blob();
     var newBlob = new Blob([blob], { type: "application/zip" });
@@ -57,7 +79,7 @@ export class InnerEntry extends React.Component {
     link.download = "elogy_entry_" + this.props.id + ".zip";
     document.body.appendChild(link);
     link.click();
-    setTimeout(function() {
+    setTimeout(function () {
       // For Firefox it is necessary to delay revoking the ObjectURL
       window.URL.revokeObjectURL(data);
       link.remove();
@@ -81,7 +103,7 @@ export class InnerEntry extends React.Component {
   }
 
   render() {
-    const { downloading } = this.state;
+    const { downloading, newerVersion } = this.state;
     const logbook = this.props.logbook;
     const followups = this.props.followups
       ? this.props.followups.map((followup, i) => (
@@ -92,13 +114,14 @@ export class InnerEntry extends React.Component {
             logbook={this.props.logbook}
             currentEntryId={this.props.currentEntryId}
             contentFilter={this.props.contentFilter}
+            fetchEntry={this.props.fetchEntry}
             {...followup}
           />
         ))
       : null;
 
     const nonEmbeddedAttachments = this.props.attachments.filter(
-      a => !a.embedded
+      (a) => !a.embedded
     );
     const attachments =
       nonEmbeddedAttachments.length > 0 ? (
@@ -160,7 +183,7 @@ export class InnerEntry extends React.Component {
         role="button"
         to={{
           pathname: `/logbooks/${logbook.id}/entries/${this.props.id}/edit`,
-          search: window.location.search
+          search: window.location.search,
         }}
         title="Make changes to this entry"
       >
@@ -187,6 +210,17 @@ export class InnerEntry extends React.Component {
               >
                 Download
               </button>
+              {newerVersion && <button
+                type="button"
+                className="btn btn-link"
+                title={`Someone has updated this entry. Click to refresh`}
+                onClick={() => this.props.fetchEntry(
+                  this.props.logbook.id,
+                  this.props.id,
+                )}
+              >
+                <FontAwesomeIcon icon={faSyncAlt} />
+              </button>}
             </div>
             <div>
               {followupNumber}
@@ -226,7 +260,7 @@ class Entry extends React.Component {
       title: "",
       authors: [],
       content: "",
-      loadError: ""
+      loadError: "",
     };
   }
 
@@ -235,7 +269,7 @@ class Entry extends React.Component {
     const response = await fetch(
       `/api/logbooks/${logbookId}/entries/${entryId}/?thread=true`,
       {
-        headers: { Accept: "application/json" }
+        headers: { Accept: "application/json" },
       }
     );
     if (!response.ok) {
@@ -243,7 +277,7 @@ class Entry extends React.Component {
         case 401:
           this.setState({
             loading: false,
-            loadError: "You are not authorized to view this entry"
+            loadError: "You are not authorized to view this entry",
           });
           break;
         default:
@@ -251,7 +285,7 @@ class Entry extends React.Component {
             loading: false,
             loadError:
               "Unable to load entry, the server responsed with code " +
-              response.status
+              response.status,
           });
       }
       return;
@@ -266,7 +300,6 @@ class Entry extends React.Component {
       this.props.match.params.entryId
     );
   }
-
   async UNSAFE_componentWillReceiveProps(newProps) {
     if (
       newProps.match.params.entryId !== this.state.id ||
@@ -283,9 +316,7 @@ class Entry extends React.Component {
   render() {
     const { logbook, id, loadError, loading } = this.state;
     if (loading) {
-      return (
-        <Loading/>
-      );
+      return <Loading />;
     }
     if (loadError) {
       return (
@@ -318,7 +349,7 @@ class Entry extends React.Component {
                   role="button"
                   to={{
                     pathname: `/logbooks/${logbook.id}/entries/${this.state.follows}`,
-                    search: window.location.search
+                    search: window.location.search,
                   }}
                   title="Go to the entry this one is a followup to"
                 >
@@ -330,7 +361,7 @@ class Entry extends React.Component {
                 role="button"
                 to={{
                   pathname: `/logbooks/${logbook.id}/entries/${this.state.id}/new`,
-                  search: window.location.search
+                  search: window.location.search,
                 }}
                 title="Create a new entry that follows this one."
               >
@@ -341,7 +372,7 @@ class Entry extends React.Component {
                 role="button"
                 to={{
                   pathname: `/logbooks/${logbook.id}/entries/new`,
-                  search: window.location.search
+                  search: window.location.search,
                 }}
                 title="Create a new entry in this logbook"
               >
@@ -353,7 +384,7 @@ class Entry extends React.Component {
           <Link
             to={{
               pathname: `/logbooks/${logbook.id}/entries/${this.state.id}`,
-              search: window.location.search
+              search: window.location.search,
             }}
           >
             <span className="logbook">
@@ -372,6 +403,7 @@ class Entry extends React.Component {
               {...this.state}
               contentFilter={query.content}
               currentEntryId={parseInt(this.props.match.params.entryId, 10)}
+              fetchEntry={(logbookid, entryid) => this.fetchEntry(logbookid, entryid)}
             />
           </div>
         </div>

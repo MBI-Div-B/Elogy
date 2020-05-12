@@ -70,10 +70,17 @@ class EntryDownloadResource(Resource):
         return send_file(html, mimetype="application/zip", as_attachment=True, attachment_filename=(html))
 
 
+
+class EntryEditedResource(Resource):
+    "Handles requests fetching updatetime of an entry"
+
+    def get(self, entry_id):
+        entry = Entry.get(Entry.id == entry_id)
+        return str(entry.last_changed_at) + "+0000"
+
 class EntryResource(Resource):
 
     "Handle requests for a single entry"
-
     @use_args({"thread": Boolean(missing=False)})
     @marshal_with(fields.entry_full, envelope="entry")
     def get(self, args, entry_id, logbook_id=None, revision_n=None):
