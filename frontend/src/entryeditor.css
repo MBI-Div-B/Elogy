@@ -147,12 +147,14 @@
 
 
 #entryeditor .attachments-drop {
-    /* min-height: 30px; */
-    max-height: 100px;
-    overflow-y: auto;
-    border: 3px dashed grey;
+    border: 1px dashed #aaac57;
     padding: 5px;
     text-align: center;
+    cursor: pointer;
+    background: #fffadb;
+    color: #5d5d0a;
+    font-size: 0.9em;
+    margin: 0.2em 0em 0.4em 0em;
 }
 
 #entryeditor .attachments-drop .attachment {
@@ -160,7 +162,11 @@
     vertical-align: top;
     pointer-events: none;
 }
-
+.link-aligned{
+    display: inline-block;
+    margin-top: 0.1em;
+    margin-right: -0.2em;
+}
 
 /* #entryeditor .commands button {
     font-size: 100%;
@@ -186,7 +192,7 @@
 } */
 
 #entryeditor .attachments {
-    max-height: 180px;
+    max-height: 110px;
     overflow-y: auto;
 }
 
