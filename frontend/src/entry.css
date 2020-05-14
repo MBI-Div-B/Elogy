@@ -167,9 +167,9 @@
 }
 
 #entry .attachment .preview {
-    max-height: 50px;
+    max-height: 100px;
     overflow: hidden;
-    width: 110px;
+    width: 30%;
 }
 
 #entry table {

@@ -64,10 +64,10 @@ export const AttachmentPreview = ({ attachment }) => (
   <div>
     <div className="preview" style={{ display: "inline-block" }}>
       <a href={attachment.link}>
-        <AttachmentPreviewIcon attachment={attachment} />
+        <span style={{fontSize: "2em"}}><AttachmentPreviewIcon attachment={attachment} /></span>
       </a>
     </div>
-    <div style={{ display: "inline-block", verticalAlign: "top", marginLeft: "0.2em" }}>
+    <div style={{ display: "inline-block", verticalAlign: "top", marginLeft: "0.2em", maxWidth: "65%", overflow: "hidden" }}>
       <div className="filename">
         <a href={attachment.link}>{attachment.filename}</a>
       </div>
