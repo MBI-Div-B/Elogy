@@ -9,7 +9,7 @@ const ICON_CLASS_MAP = {
   "application/pdf": "fa fa fa-file-pdf-o",
   "text/plain": "fa fa-file-text-o",
   "text/csv": "fa fa-file-text-o",
-  "application/zip": "fa fa-file-archive-o"
+  "application/zip": "fa fa-file-archive-o",
   // TODO: detect more file types
 };
 
@@ -62,21 +62,23 @@ export const AttachmentPreviewIcon = ({ attachment }) =>
 
 export const AttachmentPreview = ({ attachment }) => (
   <div>
-    <div className="preview">
+    <div className="preview" style={{ display: "inline-block" }}>
       <a href={attachment.link}>
-        <AttachmentPreviewIcon attachment={attachment} />
+        <span style={{fontSize: "2em"}}><AttachmentPreviewIcon attachment={attachment} /></span>
       </a>
     </div>
-    <div className="filename">
-      <a href={attachment.link}>{attachment.filename}</a>
-    </div>
-    <div className="timestamp">
-      {attachment.timestamp ? formatDateTimeString(attachment.timestamp) : ""}
-    </div>
-    <div className="size">
-      {attachment.metadata && attachment.metadata.size
-        ? `${attachment.metadata.size.width}⨯${attachment.metadata.size.height}`
-        : ""}
+    <div style={{ display: "inline-block", verticalAlign: "top", marginLeft: "0.2em", maxWidth: "65%", overflow: "hidden" }}>
+      <div className="filename">
+        <a href={attachment.link}>{attachment.filename}</a>
+      </div>
+      <div className="timestamp">
+        {attachment.timestamp ? formatDateTimeString(attachment.timestamp) : ""}
+      </div>
+      <div className="size">
+        {attachment.metadata && attachment.metadata.size
+          ? `${attachment.metadata.size.width}⨯${attachment.metadata.size.height}`
+          : ""}
+      </div>
     </div>
   </div>
 );
@@ -87,7 +89,7 @@ export const EntryAttachments = ({ attachments, onRemove }) => {
       {attachments.map((att, i) => {
         //if the attachment has no longer been uploaded yet it is of type File, which has different attributes
         //if file, we only print the name. Otherwise we show the preview and metadata with the <AttachmentPreview> comp.
-        const isFile = (typeof att.name === "string");
+        const isFile = typeof att.name === "string";
         return (
           <div className="attachment" key={i} title={att.filename}>
             {onRemove ? (
@@ -97,7 +99,7 @@ export const EntryAttachments = ({ attachments, onRemove }) => {
                     position: "absolute",
                     top: "0em",
                     left: "0em",
-                    padding: ".2rem .5rem"
+                    padding: ".2rem .5rem",
                   }}
                   className="btn btn-danger btn-xs"
                   title="Delete the attachment"

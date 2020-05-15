@@ -24,6 +24,8 @@ import TINYMCE_CONFIG from "./tinymceconfig.js";
 import { withProps, debounce } from "./util.js";
 import { InnerEntry } from "./entry.js";
 import { MoveEntryWidget } from "./moveWidgets.js";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCloudUploadAlt } from "@fortawesome/free-solid-svg-icons";
 import "./entryeditor.css";
 
 class EntryAttributeEditor extends React.Component {
@@ -33,7 +35,7 @@ class EntryAttributeEditor extends React.Component {
     super(props);
     this.state = {
       value: props.value,
-      newOptions: [] // any options that are not in the logbook config
+      newOptions: [], // any options that are not in the logbook config
     };
   }
 
@@ -57,7 +59,7 @@ class EntryAttributeEditor extends React.Component {
   onChangeMultiSelect(values) {
     const options = this.props.config.options
       .concat(this.state.newOptions)
-      .map(o => o.toLowerCase());
+      .map((o) => o.toLowerCase());
     /* Since we're using a Creatable, we need to check if the
            selected values are in the current option list, and if not,
            add them to the logbook. This is a little messy, hopefully
@@ -66,14 +68,14 @@ class EntryAttributeEditor extends React.Component {
 
            TODO: Maybe adding an option here should also add it to the
            logbook attribute config? */
-    values.forEach(value => {
+    values.forEach((value) => {
       if (options.indexOf(value.value.toLowerCase()) === -1) {
         this.setState({
-          newOptions: this.state.newOptions.concat([value.value])
+          newOptions: this.state.newOptions.concat([value.value]),
         });
       }
     });
-    this.setState({ value: values.map(o => o.value) });
+    this.setState({ value: values.map((o) => o.value) });
   }
 
   onBlur() {
@@ -81,7 +83,7 @@ class EntryAttributeEditor extends React.Component {
   }
 
   getOptions() {
-    return this.props.config.options.concat(this.state.newOptions).map(o => {
+    return this.props.config.options.concat(this.state.newOptions).map((o) => {
       return { label: o, value: o };
     });
   }
@@ -208,6 +210,7 @@ class EntryEditorBase extends React.Component {
       lock: null,
       error: null,
       loadError: "",
+      showAttachments: true,
     };
     // we don't want to stress the backend by searching for users
     // at every keystroke so we'll limit the rate a little.
@@ -218,7 +221,7 @@ class EntryEditorBase extends React.Component {
   }
 
   UNSAFE_componentWillMount() {
-    window.onbeforeunload = e => this.getPromptMessage();
+    window.onbeforeunload = (e) => this.getPromptMessage();
   }
 
   componentWillUnmount() {
@@ -230,7 +233,7 @@ class EntryEditorBase extends React.Component {
     const response = await fetch(
       `/api/logbooks/${logbookId}/entries/${entryId}/`,
       {
-        headers: { Accept: "application/json" }
+        headers: { Accept: "application/json" },
       }
     );
     if (!response.ok) {
@@ -238,7 +241,7 @@ class EntryEditorBase extends React.Component {
         case 401:
           this.setState({
             loading: false,
-            loadError: "You are not authorized to view this entry"
+            loadError: "You are not authorized to view this entry",
           });
           break;
         default:
@@ -246,7 +249,7 @@ class EntryEditorBase extends React.Component {
             loading: false,
             loadError:
               "Unable to load entry, the server responsed with code " +
-              response.status
+              response.status,
           });
       }
       return;
@@ -255,21 +258,21 @@ class EntryEditorBase extends React.Component {
     if (fill) {
       this.setState({ loadError: "", entry: json.entry, ...json.entry });
     } else {
-      this.setState({loadError: "", ...json});
+      this.setState({ loadError: "", ...json });
     }
   }
 
   async fetchLogbook(logbookId) {
     // get data for the given logbook from the backend
     const response = await fetch(`/api/logbooks/${logbookId}/`, {
-      headers: { Accept: "application/json" }
+      headers: { Accept: "application/json" },
     });
     if (!response.ok) {
       switch (response.status) {
         case 401:
           this.setState({
             loading: false,
-            loadError: "You are not authorized to view this entry"
+            loadError: "You are not authorized to view this entry",
           });
           break;
         default:
@@ -277,7 +280,7 @@ class EntryEditorBase extends React.Component {
             loading: false,
             loadError:
               "Unable to load entry, the server responsed with code " +
-              response.status
+              response.status,
           });
       }
       return;
@@ -289,12 +292,12 @@ class EntryEditorBase extends React.Component {
   async fetchUserSuggestions(input, callback) {
     // search for author names
     const response = await fetch(`/api/users/?search=${input}`, {
-      headers: { Accept: "application/json" }
+      headers: { Accept: "application/json" },
     });
     const json = await response.json();
     callback(null, {
       options: (this.state.authors || []).concat(json.users),
-      complete: false
+      complete: false,
     });
   }
 
@@ -305,14 +308,14 @@ class EntryEditorBase extends React.Component {
   loadSessionAuthors() {
     const { userCredentials, loggedIn } = this.props;
     const sessionNewAuthorsEncoded = window.sessionStorage.newAuthors;
-    if (userCredentials && loggedIn){
+    if (userCredentials && loggedIn) {
       const author = {
         email: userCredentials.email,
         login: userCredentials.username,
         name: userCredentials.name,
-      }
+      };
       this.setState({ authors: [author] });
-    }else if (sessionNewAuthorsEncoded) {
+    } else if (sessionNewAuthorsEncoded) {
       const sessionNewAuthors = JSON.parse(sessionNewAuthorsEncoded);
       this.setState({ authors: sessionNewAuthors });
     }
@@ -340,7 +343,7 @@ class EntryEditorBase extends React.Component {
     var id = this.state.attachments[attachmentIndex].id;
     if (id) {
       this.setState({
-        deleteAttachments: [...this.state.deleteAttachments, id]
+        deleteAttachments: [...this.state.deleteAttachments, id],
       });
     }
     var attachments = this.state.attachments;
@@ -402,10 +405,10 @@ class EntryEditorBase extends React.Component {
         name="authors"
         placeholder="Authors"
         // ref="authors"
-        valueRenderer={o => o.name}
+        valueRenderer={(o) => o.name}
         multi={true}
         value={authors}
-        optionRenderer={o => `${o.login} [${o.name}]`}
+        optionRenderer={(o) => `${o.login} [${o.name}]`}
         valueKey="login"
         labelKey="name"
         options={authors}
@@ -448,17 +451,30 @@ class EntryEditorBase extends React.Component {
       : null;
   }
 
-  getAttachments(attachments) {
+  getAttachments(attachments, showAttachments) {
     return (
       <div>
-        <Dropzone
-          onDrop={this.onAddAttachment.bind(this)}
-          title="Click (or drag-and-drop) to add attachments."
-          className="attachments-drop"
+        <span className="link-aligned" style={{fontWeight: "bold"}}>Attachments</span>{" "}
+        <button
+          className="btn btn-link"
+          style={{ verticalAlign: "top" }}
+          onClick={(e) =>
+            this.setState({ showAttachments: !this.state.showAttachments })
+          }
         >
-          Drop attachments here (or click)!
-        </Dropzone>
-        {attachments.length > 0 ? (
+          {showAttachments ? "[hide]" : "[show]"}
+        </button>
+        {showAttachments && (
+          <Dropzone
+            onDrop={this.onAddAttachment.bind(this)}
+            title="Click (or drag-and-drop) to add attachments."
+            className="attachments-drop"
+          >
+            Drag-and-drop or click to add new attachment
+            {/* <FontAwesomeIcon style={{color: "#aaa"}} icon={faCloudUploadAlt} /> */}
+          </Dropzone>
+        )}
+        {attachments.length > 0 && showAttachments ? (
           <EntryAttachments
             attachments={attachments}
             onRemove={this.onRemoveAttachment.bind(this)}
@@ -575,7 +591,7 @@ class EntryEditorBase extends React.Component {
               );
             }
             this.setState({
-              redirect: `/logbooks/${this.state.logbook.id}/entries/${this.state.entry.id}`
+              redirect: `/logbooks/${this.state.logbook.id}/entries/${this.state.entry.id}`,
             });
           }}
           className="btn btn-danger btn-sm ml-1"
@@ -608,13 +624,13 @@ class EntryEditorBase extends React.Component {
     const error = message
       ? message
       : Object.keys(messages)
-          .map(key => key + ": " + messages[key])
+          .map((key) => key + ": " + messages[key])
           .reduce((acc, cur) => acc + " " + cur);
     return <span className="error">{error}</span>;
   }
 
   checkRequiredAttributes() {
-    return this.state.logbook.attributes.every(attr => {
+    return this.state.logbook.attributes.every((attr) => {
       if (attr.required)
         return (
           this.state.attributes[attr.name] !== undefined &&
@@ -625,7 +641,7 @@ class EntryEditorBase extends React.Component {
   }
 
   removeAttachments(entryId) {
-    return this.state.deleteAttachments.map(attachmentID => {
+    return this.state.deleteAttachments.map((attachmentID) => {
       return fetch(
         `/api/logbooks/${this.state.logbook.id}/entries/${entryId}/attachments/${attachmentID}`,
         { method: "DELETE" }
@@ -634,7 +650,7 @@ class EntryEditorBase extends React.Component {
   }
 
   submitAttachments(entryId) {
-    return this.state.attachments.map(attachment => {
+    return this.state.attachments.map((attachment) => {
       // TODO: also allow removing attachments
       if (!(attachment instanceof File)) {
         // this attachment is already uploaded
@@ -677,12 +693,12 @@ class EntryEditorNew extends EntryEditorBase {
     /* TODO: here we might do some checking of the input; e.g.
            verify that any required attributes are filled in etc. */
 
-    this.setState({saving: true})
+    this.setState({ saving: true });
     // we're creating a new entry
     fetch(`/api/logbooks/${this.state.logbook.id}/entries/`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         title: this.state.title,
@@ -693,40 +709,40 @@ class EntryEditorNew extends EntryEditorBase {
         follows_id: this.state.follows,
         archived: this.state.archived,
         metadata: this.state.metadata,
-        priority: this.state.priority
-      })
+        priority: this.state.priority,
+      }),
     })
-      .then(response => {
+      .then((response) => {
         if (response.ok) {
           return response.json();
         }
         // something went wrong!
         // TODO: error handling probably needs some work.
         response.json().then(
-          error => {
+          (error) => {
             console.log("error", error);
             this.setState({ error: error, saving: false });
           },
-          error => {
+          (error) => {
             console.log("error", error);
             this.setState({
               saving: false,
               error: {
                 message: response.statusText,
                 code: response.status,
-              }
+              },
             });
           }
         );
         throw new Error("submit failed");
       })
       .then(
-        response => {
+        (response) => {
           // at this point we have successfully submitted the entry,
           // mow we just need to submit any attachments.
           const entryId = response.entry.id;
           Promise.all(this.submitAttachments(response.entry.id)).then(
-            response => {
+            (response) => {
               // signal other parts of the app that the logbook needs refreshing
               this.props.eventbus.publish(
                 "logbook.reload",
@@ -736,15 +752,15 @@ class EntryEditorNew extends EntryEditorBase {
               console.log("history", history.location);
               history.push({
                 pathname: `/logbooks/${this.state.logbook.id}/entries/${entryId}`,
-                search: window.location.search
+                search: window.location.search,
               });
             }
           );
-          this.setState({saving: false})
+          this.setState({ saving: false });
         },
-        error => {
+        (error) => {
           console.log(error);
-          this.setState({saving: false})
+          this.setState({ saving: false });
         }
       );
   }
@@ -757,7 +773,7 @@ class EntryEditorNew extends EntryEditorBase {
         </div>
       );
     }
-    if (!this.state.logbook) return <Loading/>;
+    if (!this.state.logbook) return <Loading />;
 
     // Using a table here, because TinyMCE sometimes does not play well with
     // flexbox, causing height issues... hopefully this will be more robust.
@@ -772,7 +788,6 @@ class EntryEditorNew extends EntryEditorBase {
               <th className="title">
                 New entry in{" "}
                 <span className="logbook">
-                  {/* <i className="fa fa-book" />{" "} */}
                   {this.state.logbook.name || "[unknown]"}
                 </span>
               </th>
@@ -797,7 +812,12 @@ class EntryEditorNew extends EntryEditorBase {
               </td>
             </tr>
             <tr>
-              <td>{this.getAttachments(this.state.attachments)}</td>
+              <td>
+                {this.getAttachments(
+                  this.state.attachments,
+                  this.state.showAttachments
+                )}
+              </td>
             </tr>
             <tr>
               <td>{this.getError()}</td>
@@ -808,7 +828,7 @@ class EntryEditorNew extends EntryEditorBase {
                   style={{
                     borderTop: "1px solid #ddd",
                     marginBottom: "1em",
-                    paddingTop: "1em"
+                    paddingTop: "1em",
                   }}
                 >
                   {this.getPrioritySelector()}
@@ -859,7 +879,7 @@ class EntryEditorFollowup extends EntryEditorBase {
     // we want to default to the attributes of the original entry, but
     // apply any changes on top.
     this.state.logbook.attributes.forEach(
-      attr =>
+      (attr) =>
         (attributes[attr.name] = this.state.attributes.hasOwnProperty(attr.name)
           ? this.state.attributes[attr.name]
           : this.state.entry.attributes[attr.name])
@@ -869,7 +889,7 @@ class EntryEditorFollowup extends EntryEditorBase {
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           title: this.state.title,
@@ -879,34 +899,34 @@ class EntryEditorFollowup extends EntryEditorBase {
           attributes: attributes,
           archived: this.state.archived,
           priority: this.state.priority,
-          metadata: this.state.metadata
-        })
+          metadata: this.state.metadata,
+        }),
       }
     )
-      .then(response => {
+      .then((response) => {
         if (response.ok) {
           return response.json();
         }
         response.json().then(
-          error => {
+          (error) => {
             this.setState({ error });
           },
-          error => {
+          (error) => {
             this.setState({
               error: {
                 message: response.statusText,
-                code: response.status
-              }
+                code: response.status,
+              },
             });
           }
         );
         throw new Error("submit failed");
       })
       .then(
-        response => {
+        (response) => {
           const entryId = response.entry.id;
           Promise.all(this.submitAttachments(response.entry.id)).then(
-            response => {
+            (response) => {
               // signal other parts of the app that the logbook needs refreshing
               this.props.eventbus.publish(
                 "logbook.reload",
@@ -915,12 +935,12 @@ class EntryEditorFollowup extends EntryEditorBase {
               // send the browser to view the new entry
               history.push({
                 pathname: `/logbooks/${this.state.logbook.id}/entries/${entryId}`,
-                search: window.location.search
+                search: window.location.search,
               });
             }
           );
         },
-        error => {
+        (error) => {
           this.setState({ error });
         }
       );
@@ -934,7 +954,7 @@ class EntryEditorFollowup extends EntryEditorBase {
         </div>
       );
     }
-    if (!this.state.logbook || !this.state.entry) return <Loading/>;
+    if (!this.state.logbook || !this.state.entry) return <Loading />;
 
     return (
       <div id="entryeditor">
@@ -947,7 +967,6 @@ class EntryEditorFollowup extends EntryEditorBase {
                 Followup to {this.state.entry.title} in{" "}
                 <span className="logbook">
                   {" "}
-                  {/* <i className="fa fa-book" />  */}
                   {this.state.logbook.name || "ehe"}
                 </span>
               </th>
@@ -978,7 +997,12 @@ class EntryEditorFollowup extends EntryEditorBase {
               </td>
             </tr>
             <tr>
-              <td>{this.getAttachments(this.state.attachments)}</td>
+              <td>
+                {this.getAttachments(
+                  this.state.attachments,
+                  this.state.showAttachments
+                )}
+              </td>
             </tr>
             <tr>
               <td>{this.getError()}</td>
@@ -1008,12 +1032,12 @@ class EntryEditorEdit extends EntryEditorBase {
 
   lockEntry(logbookId, entryId) {
     fetch(`/api/logbooks/${logbookId}/entries/${entryId}/lock`, {
-      method: "POST"
+      method: "POST",
     })
-      .then(response => {
+      .then((response) => {
         return response.json();
       })
-      .then(response => {
+      .then((response) => {
         if (response.status === 409) {
           // The entry is locked by someone else!
           this.setState({ lockedBySomeoneElse: true });
@@ -1027,15 +1051,15 @@ class EntryEditorEdit extends EntryEditorBase {
 
   stealEntryLock(logbookId, entryId) {
     fetch(`/api/logbooks/${logbookId}/entries/${entryId}/lock?steal=true`, {
-      method: "POST"
+      method: "POST",
     })
-      .then(response => {
+      .then((response) => {
         return response.json();
       })
-      .then(response => {
+      .then((response) => {
         this.setState({
           lockedBySomeoneElse: false,
-          lock: response.lock
+          lock: response.lock,
         });
       });
   }
@@ -1067,13 +1091,13 @@ class EntryEditorEdit extends EntryEditorBase {
 
   onSave() {
     this.submitted = true;
-    this.setState({saving: true})
+    this.setState({ saving: true });
     fetch(
       `/api/logbooks/${this.state.logbook.id}/entries/${this.state.entry.id}/`,
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           logbook_id: this.state.logbookId || this.state.logbook.id,
@@ -1086,22 +1110,22 @@ class EntryEditorEdit extends EntryEditorBase {
           follows_id: this.state.follows,
           archived: this.state.archived,
           revision_n: this.state.entry.revision_n, // must be included for edits!
-          priority: this.state.priority
-        })
+          priority: this.state.priority,
+        }),
       }
-    ).then(response => {
+    ).then((response) => {
       if (response.ok) {
         this.setState({
           notification: "Entry saved",
           saving: false,
           entry: {
             ...this.state.entry,
-            revision_n: this.state.entry.revision_n + 1
-          }
+            revision_n: this.state.entry.revision_n + 1,
+          },
         });
         setTimeout(() => this.setState({ notification: "" }), 2000);
       } else {
-        response.json().then(error => {
+        response.json().then((error) => {
           this.setState({ error, saving: false });
         });
       }
@@ -1110,13 +1134,13 @@ class EntryEditorEdit extends EntryEditorBase {
   onSubmit({ history }) {
     this.submitted = true;
     // we're creating a new entry
-    this.setState({saving: true})
+    this.setState({ saving: true });
     fetch(
       `/api/logbooks/${this.state.logbook.id}/entries/${this.state.entry.id}/`,
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           logbook_id: this.state.logbookId || this.state.logbook.id,
@@ -1129,37 +1153,37 @@ class EntryEditorEdit extends EntryEditorBase {
           follows_id: this.state.follows,
           archived: this.state.archived,
           revision_n: this.state.entry.revision_n, // must be included for edits!
-          priority: this.state.priority
-        })
+          priority: this.state.priority,
+        }),
       }
     )
-      .then(response => {
+      .then((response) => {
         if (response.ok) {
           return response.json();
         }
         response.json().then(
-          error => {
+          (error) => {
             this.setState({ error, saving: false });
           },
-          error => {
+          (error) => {
             this.setState({
               saving: false,
               error: {
                 message: response.statusText,
-                code: response.status
-              }
+                code: response.status,
+              },
             });
           }
         );
         throw new Error("submit failed");
       })
       .then(
-        response => {
+        (response) => {
           const entryId = response.entry.id;
           Promise.all(
             this.removeAttachments(response.entry.id),
             this.submitAttachments(response.entry.id)
-          ).then(response => {
+          ).then((response) => {
             // signal other parts of the app that the logbook needs refreshing
             this.props.eventbus.publish(
               "logbook.reload",
@@ -1168,14 +1192,14 @@ class EntryEditorEdit extends EntryEditorBase {
             // send the browser to view the new entry
             history.push({
               pathname: `/logbooks/${this.state.logbook.id}/entries/${entryId}`,
-              search: window.location.search
+              search: window.location.search,
             });
           });
-          this.setState({saving: false})
+          this.setState({ saving: false });
         },
-        error => {
+        (error) => {
           console.log(error);
-          this.setState({saving: false})
+          this.setState({ saving: false });
         }
       );
   }
@@ -1238,7 +1262,6 @@ class EntryEditorEdit extends EntryEditorBase {
         <div>
           Editing followup to [{this.state.follows}] in{" "}
           <span className="logbook">
-            {/* <i className="fa fa-book" />{" "} */}
             {this.state.logbook.name || "[unknown]"}
           </span>
         </div>
@@ -1248,7 +1271,6 @@ class EntryEditorEdit extends EntryEditorBase {
         <div>
           Editing '{this.state.title}' in{" "}
           <span className="logbook">
-            {/* <i className="fa fa-book" />{" "} */}
             {this.state.logbook.name || "[unknown]"}
           </span>
         </div>
@@ -1264,7 +1286,7 @@ class EntryEditorEdit extends EntryEditorBase {
         </div>
       );
     }
-    if (!(this.state.logbook && this.state.entry)) return <Loading/>;
+    if (!(this.state.logbook && this.state.entry)) return <Loading />;
 
     return (
       <div id="entryeditor">
@@ -1310,7 +1332,12 @@ class EntryEditorEdit extends EntryEditorBase {
               </td>
             </tr>
             <tr>
-              <td>{this.getAttachments(this.state.attachments)}</td>
+              <td>
+                {this.getAttachments(
+                  this.state.attachments,
+                  this.state.showAttachments
+                )}
+              </td>
             </tr>
             <tr>
               <td>{this.getError()}</td>
@@ -1321,7 +1348,7 @@ class EntryEditorEdit extends EntryEditorBase {
                   style={{
                     borderTop: "1px solid #ddd",
                     marginBottom: "1em",
-                    paddingTop: "1em"
+                    paddingTop: "1em",
                   }}
                 >
                   {this.getPrioritySelector()}
