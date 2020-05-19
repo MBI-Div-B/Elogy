@@ -160,6 +160,7 @@ followup = {
     "revision_n": fields.Integer,
     "lock": fields.Nested(entry_lock, allow_null=True),
     "edit_lock": fields.Boolean,
+    "owner": fields.String,
 }
 
 entry_full = {
@@ -184,6 +185,7 @@ entry_full = {
     "previous": EntryId,
     "archived": fields.Boolean,
     "edit_lock": fields.Boolean,
+    "owner": fields.String,
 }
 
 entry = {
@@ -270,6 +272,7 @@ short_entry = {
     "n_attachments": NumberOf(attribute="attachments"),
     "n_followups": fields.Integer,
     "edit_lock": fields.Boolean,
+    "owner": fields.String,
 }
 
 

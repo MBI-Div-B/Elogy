@@ -125,7 +125,7 @@ class EntryResource(Resource):
         if args.get("follows_id"):
             # don't allow pinning followups, that makes no sense
             args["pinned"] = False
-        entry = Entry.create(**args)
+        entry = Entry.create(**args, owner=get_user())
         for attachment in inline_attachments:
             attachment.entry = entry
             attachment.save()
@@ -138,8 +138,8 @@ class EntryResource(Resource):
         "update entry"
         entry_id = entry_id or args["id"]
         entry = Entry.get(Entry.id == entry_id)
-        if not entry.edit_lock is None:
-            if get_user() != entry.edit_lock:
+        if  entry.edit_lock:
+            if get_user() != entry.owner:
                 abort(401, message=("This entry can only be edited by its creator"))
         if not has_access(logbook_id=entry.logbook_id):
             abort(401, message=("You don't have access to this logbook"))
