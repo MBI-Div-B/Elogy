@@ -125,7 +125,7 @@ class EntryResource(Resource):
         if args.get("follows_id"):
             # don't allow pinning followups, that makes no sense
             args["pinned"] = False
-        entry = Entry.create(**args)
+        entry = Entry.create(**args, owner=get_user())
         for attachment in inline_attachments:
             attachment.entry = entry
             attachment.save()
