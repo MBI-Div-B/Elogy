@@ -427,6 +427,7 @@ class Entry(Model):
     follows = ForeignKeyField("self", null=True, related_name="followups")
     archived = BooleanField(default=False)
     edit_lock = BooleanField(default=False)
+    owner = CharField(default="")
 
     def __str__(self):
         return "[{}] {}".format(self.id, self.title)
