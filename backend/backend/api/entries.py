@@ -11,7 +11,7 @@ from ..attachments import handle_img_tags
 from ..export import export_entry_as_html, export_logbook_as_html
 from ..actions import new_entry, edit_entry
 from . import fields, send_signal
-from ..authentication import has_access
+from ..authentication import has_access, get_user
 
 
 entry_args = {
@@ -34,6 +34,7 @@ entry_args = {
     "metadata": Dict(),
     "priority": Integer(missing=0),
     "revision_n": Integer(),
+    "edit_lock": Boolean(missing=False),
 }
 
 
@@ -137,6 +138,9 @@ class EntryResource(Resource):
         "update entry"
         entry_id = entry_id or args["id"]
         entry = Entry.get(Entry.id == entry_id)
+        if not entry.edit_lock is None:
+            if get_user() != entry.edit_lock:
+                abort(401, message=("This entry can only be edited by its creator"))
         if not has_access(logbook_id=entry.logbook_id):
             abort(401, message=("You don't have access to this logbook"))
         # to prevent overwiting someone else's changes we require the

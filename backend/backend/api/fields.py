@@ -181,7 +181,8 @@ entry_full = {
     "lock": fields.Nested(entry_lock, allow_null=True),
     "next": EntryId,
     "previous": EntryId,
-    "archived": fields.Boolean
+    "archived": fields.Boolean,
+    "edit_lock": fields.Boolean,
 }
 
 entry = {

@@ -426,6 +426,7 @@ class Entry(Model):
     last_changed_at = UTCDateTimeField(null=True)
     follows = ForeignKeyField("self", null=True, related_name="followups")
     archived = BooleanField(default=False)
+    edit_lock = BooleanField(default=False)
 
     def __str__(self):
         return "[{}] {}".format(self.id, self.title)

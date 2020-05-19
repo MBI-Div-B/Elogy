@@ -4,8 +4,8 @@ from flask import current_app
 from flask_restful import reqparse
 import sys
 
-def login(username, password):
 
+def login(username, password):
     """
     Performs username/password autentication against the API endpoint JWT_AUTH_URL. In the case of max iv the authentication
     service returns a JSON object with the following data:
@@ -34,7 +34,7 @@ def login(username, password):
     """
 
     r = requests.post(
-    url=current_app.config["JWT_AUTH_URL"], data={"username": username, "password": password,  "includeDecoded": True})
+        url=current_app.config["JWT_AUTH_URL"], data={"username": username, "password": password,  "includeDecoded": True})
 
     if r.status_code is not 200:
         print("Error status code: " + str(r.status_code), file=sys.stdout)
@@ -43,8 +43,28 @@ def login(username, password):
         data = r.json()
         return data
 
-def has_access(user_group="", logbook_id=None):
 
+def get_user():
+    """ Returns the currently logged in user or an empty string. Does this by decoding jwt (externally), and then returning its username attribute"""
+    parser = reqparse.RequestParser()
+    parser.add_argument('jwt', location='cookies')
+    args = parser.parse_args()
+    jwt = args["jwt"]
+    if not jwt:
+        return ""
+
+    r = requests.post(
+        url=current_app.config["JWT_DECODE_URL"], data={"jwt": jwt})
+
+    if r.status_code is not 200:
+        print("Error status code: " + str(r.status_code), file=sys.stdout)
+        return ""
+    else:
+        data = r.json()
+        return data["username"]
+
+
+def has_access(user_group="", logbook_id=None):
     """
     Determines if the user making the current request belongs to the given user_group, either by providing the user_group directly,
     or by giving the id of the logbook for which the user_group should be checked
@@ -57,7 +77,7 @@ def has_access(user_group="", logbook_id=None):
         user_group = Logbook.get(Logbook.id == logbook_id).user_group
     if not user_group:
         return True
-    
+
     parser = reqparse.RequestParser()
     parser.add_argument('jwt', location='cookies')
     args = parser.parse_args()
