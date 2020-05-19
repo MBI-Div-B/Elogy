@@ -159,6 +159,7 @@ followup = {
     "metadata": fields.Raw,
     "revision_n": fields.Integer,
     "lock": fields.Nested(entry_lock, allow_null=True),
+    "edit_lock": fields.Boolean,
 }
 
 entry_full = {
@@ -267,7 +268,8 @@ short_entry = {
     "followup_authors": FollowupAuthorsField(),
     "attachment_preview": FirstIfAny(attribute="attachments"),
     "n_attachments": NumberOf(attribute="attachments"),
-    "n_followups": fields.Integer
+    "n_followups": fields.Integer,
+    "edit_lock": fields.Boolean,
 }
 
 
