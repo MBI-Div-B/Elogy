@@ -151,11 +151,19 @@ class Elogy extends React.Component {
     const cookies = new Cookies();
     cookies.set("jwt", userCredentials.jwt, { path: "/" });
     this.setState({ userCredentials, loggedIn: true });
+    eventbus.publish(
+      "logbook.reload",
+      null
+    );
   }
   onLogout() {
     const cookies = new Cookies();
     cookies.remove("jwt", { path: "/" });
     this.setState({ userCredentials: {}, loggedIn: false });
+    eventbus.publish(
+      "logbook.reload",
+      null
+    );
   }
   render() {
     const { userCredentials, loggedIn } = this.state;
