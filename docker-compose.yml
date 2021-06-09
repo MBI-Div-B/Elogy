@@ -21,6 +21,7 @@ services:
       - 'ELOGY_UPLOAD_FOLDER=/var/elogy/attachments'
       # - 'ELOGY_LDAP_SERVER=srv-ldap-2.maxiv.lu.se'
       # - 'ELOGY_LDAP_BASEDN=dc=maxlab,dc=lu,dc=se'
+      # - 'ELOGY_LDAP_USERNAME=dc=maxlab,dc=lu,dc=se'
     volumes:
       # Change the part to the left of : to select
       # where files end up in the host filesystem.
