@@ -22,7 +22,7 @@ def export_logbook_as_html(logbook_id, include_attachments):
         raise Exception("401")
     table_of_content = "<div><h2>Logbook " + logbook.name + "</h2><ul>"
     html_body = ""
-    for entry in logbook.get_all_entries():
+    for entry in logbook.get_all_entries(child_logbooks=True, followups=True):
         html_body = html_body + get_entry_as_html(entry)
         table_of_content   = table_of_content + "<li><a href='#" + str(entry.id) + "'>" + (entry.title or "(No title)") + "</a> </li>"
     table_of_content = table_of_content + "</ul></div>"
