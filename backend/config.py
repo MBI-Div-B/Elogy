@@ -29,7 +29,7 @@ LDAP_BASEDN = os.getenv("ELOGY_LDAP_BASEDN", "")
 LDAP_BIND_USERNAME = os.getenv("ELOGY_LDAP_BIND_USERNAME", "")
 LDAP_BIND_PASSWORD = os.getenv("ELOGY_LDAP_BIND_PASSWORD", "")
 
-LDAP_USERNAME_ATTRIBUTE = "sAMAccountName"
+LDAP_USERNAME_ATTRIBUTE = os.getenv("ELOGY_LDAP_USERNAME", "sAMAccountName")
 
 # Callbacks for various events
 
